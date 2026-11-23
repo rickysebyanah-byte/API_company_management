@@ -10,42 +10,22 @@ types.setTypeParser(1700, (val) => (val === null ? null : parseFloat(val)));
 types.setTypeParser(20, (val) => (val === null ? null : parseInt(val, 10)));
 
 // Konfigurasi Pool PostgreSQL / Supabase
-const connectionString = process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL;
+const defaultDatabaseUrl = 'postgresql://postgres:kijiosia123@db.ppricjddcaulleumngva.supabase.co:5432/postgres';
+const connectionString = (process.env.DATABASE_URL && process.env.DATABASE_URL.trim())
+  || (process.env.SUPABASE_DATABASE_URL && process.env.SUPABASE_DATABASE_URL.trim())
+  || defaultDatabaseUrl;
 
-let poolConfig;
-if (connectionString && connectionString.trim()) {
-  poolConfig = {
-    connectionString: connectionString.trim(),
-    ssl: { rejectUnauthorized: false },
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 8000
-  };
-} else {
-  const host = process.env.DB_HOST || process.env.SUPABASE_DB_HOST;
-  const user = process.env.DB_USER || process.env.SUPABASE_DB_USER || 'postgres';
-  const password = process.env.DB_PASSWORD || process.env.SUPABASE_DB_PASSWORD || '';
-  const database = process.env.DB_NAME || process.env.SUPABASE_DB_NAME || 'postgres';
-  const port = Number(process.env.DB_PORT || process.env.SUPABASE_DB_PORT || 5432);
-
-  if (!host) {
-    throw new Error(
-      'Konfigurasi database Supabase belum lengkap. Isi DATABASE_URL atau (DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) di file .env.'
-    );
-  }
-
-  poolConfig = {
-    host,
-    port,
-    user,
-    password,
-    database,
-    ssl: { rejectUnauthorized: false },
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 8000
-  };
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'super_secret_jwt_key_2026_enterprise_company_api';
 }
+
+const poolConfig = {
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 8000
+};
 
 const pool = new Pool(poolConfig);
 
