@@ -338,13 +338,19 @@ const onboardEmployee = async (req, res, next) => {
       return errorResponse(res, 409, 'Username atau email sudah digunakan oleh pengguna lain');
     }
 
-    // 2. Cek duplikasi kode karyawan
+    // 2. Cek kode karyawan (atau auto-generate unik jika tidak dikirim)
+    let finalCode = employee_code ? employee_code.trim() : null;
+    if (!finalCode) {
+      const randNum = Math.floor(1000 + Math.random() * 9000);
+      finalCode = `EMP-${randNum}`;
+    }
+
     const existingCode = await get(
       'SELECT id FROM employees WHERE employee_code = ?',
-      [employee_code]
+      [finalCode]
     );
     if (existingCode) {
-      return errorResponse(res, 409, 'Kode karyawan (employee_code) sudah digunakan');
+      return errorResponse(res, 409, `Kode karyawan '${finalCode}' sudah digunakan`);
     }
 
     // 3. Cek jabatan (bisa pakai position_id atau position_name)
@@ -399,7 +405,7 @@ const onboardEmployee = async (req, res, next) => {
       const newEmp = await database.run(
         `INSERT INTO employees (user_id, employee_code, full_name, position_id, manager_id, hire_date, phone)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [newUser.id, employee_code, full_name, targetPosId, manager.managerId, actualHireDate, phone || null]
+        [newUser.id, finalCode, full_name, targetPosId, manager.managerId, actualHireDate, phone || null]
       );
 
       return { userId: newUser.id, employeeId: newEmp.id };
@@ -420,12 +426,12 @@ const onboardEmployee = async (req, res, next) => {
     return successResponse(
       res,
       201,
-      `Karyawan baru ${employee_code} (${full_name}) berhasil diterima dan otomatis terhubung dengan Manager ${managerEmp ? managerEmp.full_name : 'Budi Santoso'}.`,
+      `Karyawan baru ${finalCode} (${full_name}) berhasil diterima dan otomatis terhubung dengan Manager ${managerEmp ? managerEmp.full_name : 'Budi Santoso'}.`,
       {
         token, // Token otomatis karyawan baru, langsung siap pakai untuk ajukan cuti!
         employee_id: result.employeeId,
         user_id: result.userId,
-        employee_code,
+        employee_code: finalCode,
         full_name,
         username,
         email,

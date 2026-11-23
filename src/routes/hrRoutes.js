@@ -95,13 +95,13 @@ router.get(
 );
 // Terima Karyawan Baru Lengkap Sekaligus (Buat Akun Login + Profil Karyawan dalam 1 Request)
 router.post(
-  '/employees/onboard',
+  ['/employees/onboard', '/onboard'],
   [
     body('username').trim().isLength({ min: 3, max: 80 }).withMessage('Username minimal 3 karakter'),
     body('email').trim().isEmail().withMessage('Format email tidak valid'),
     body('password').optional().isLength({ min: 6 }).withMessage('Password minimal 6 karakter'),
     body('role').optional().isIn(['Admin', 'HRD', 'Keuangan', 'Manager', 'Karyawan']).withMessage('Role tidak valid'),
-    body('employee_code').trim().notEmpty().withMessage('Kode karyawan unik (employee_code) wajib diisi'),
+    body('employee_code').optional().trim(),
     body('full_name').trim().notEmpty().withMessage('Nama lengkap (full_name) wajib diisi'),
     body('position_id').optional().isInt({ min: 1 }).toInt(),
     body('position_name').optional().trim().isString(),
