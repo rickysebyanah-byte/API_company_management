@@ -213,10 +213,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"joko_backend\",\n  \"email\": \"joko@company.local\",\n  \"password\": \"password123\",\n  \"role\": \"Karyawan\",\n  \"employee_code\": \"EMP-007\",\n  \"full_name\": \"Joko Widodo Pratama\",\n  \"position_id\": 5,\n  \"manager_id\": 4,\n  \"hire_date\": \"2026-11-23\",\n  \"phone\": \"081234567890\"\n}"
+              "raw": "{\n  \"username\": \"karyawan_budi_{{$randomInt}}\",\n  \"email\": \"budi_{{$randomInt}}@company.com\",\n  \"password\": \"password123\",\n  \"role\": \"Karyawan\",\n  \"employee_code\": \"EMP-{{$randomInt}}\",\n  \"full_name\": \"Budi Hartono S.Kom\",\n  \"position_id\": 5,\n  \"manager_code\": \"EMP-004\",\n  \"hire_date\": \"2026-03-01\",\n  \"phone\": \"08123456789\"\n}"
             },
             "url": "{{base_url}}/api/hr/employees/onboard",
-            "description": "INILAH TOMBOL HRD UNTUK MENERIMA KARYAWAN BARU! Dalam 1 langkah, sistem langsung membuatkan akun login + profil karyawan lengkap. Karyawan ini bisa langsung login dan langsung bisa ajukan cuti!"
+            "description": "Tombol HRD untuk menerima karyawan baru. Menggunakan kode unik 'employee_code' dan 'manager_code'. Sekali klik langsung membuat akun login dan profil aktif."
           }
         },
         {
@@ -234,7 +234,7 @@
           }
         },
         {
-          "name": "2.3 Lihat Detail Karyawan (Berdasarkan ID)",
+          "name": "2.3 Lihat Detail Karyawan (Berdasarkan Kode Unik EMP-005)",
           "request": {
             "method": "GET",
             "header": [
@@ -243,12 +243,12 @@
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/hr/employees/1",
-            "description": "Melihat informasi lengkap satu orang karyawan berdasarkan ID-nya."
+            "url": "{{base_url}}/api/hr/employees/EMP-005",
+            "description": "Melihat detail lengkap karyawan cukup menggunakan kode unik karyawan (contoh: EMP-005). Tidak perlu mengingat ID angka database lagi."
           }
         },
         {
-          "name": "2.4 Ubah Data Karyawan (Jabatan / Telepon / Atasan)",
+          "name": "2.4 Ubah Data Karyawan (Berdasarkan Kode Unik EMP-005)",
           "request": {
             "method": "PUT",
             "header": [
@@ -263,14 +263,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"full_name\": \"Rina Kartika Putri\",\n  \"position_id\": 5,\n  \"manager_id\": 4,\n  \"phone\": \"081298765432\"\n}"
+              "raw": "{\n  \"full_name\": \"Rina Kartika S.Kom (Lead)\",\n  \"phone\": \"08119999955\"\n}"
             },
-            "url": "{{base_url}}/api/hr/employees/5",
-            "description": "HRD mengubah informasi jabatan atau nomor telepon karyawan."
+            "url": "{{base_url}}/api/hr/employees/EMP-005",
+            "description": "Mengubah data karyawan berdasarkan kode unik 'EMP-005'."
           }
         },
         {
-          "name": "2.5 Nonaktifkan / Hapus Karyawan",
+          "name": "2.5 Nonaktifkan / Hapus Karyawan (Kode Unik EMP-099)",
           "request": {
             "method": "DELETE",
             "header": [
@@ -279,8 +279,8 @@
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/hr/employees/99",
-            "description": "Menghapus profil karyawan dan menonaktifkan akun login terkait secara aman."
+            "url": "{{base_url}}/api/hr/employees/EMP-099",
+            "description": "Menghapus karyawan dummy percobaan menggunakan kode unik 'EMP-099'."
           }
         }
       ]
@@ -334,8 +334,8 @@
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/leaves/my/1",
-            "description": "Karyawan membatalkan permohonan cuti miliknya jika statusnya masih Pending."
+            "url": "{{base_url}}/api/leaves/my/3",
+            "description": "Membatalkan permohonan cuti pending. Otomatis aman jika permohonan sudah dibatalkan sebelumnya."
           }
         },
         {
@@ -390,9 +390,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"Rejected\",\n  \"review_notes\": \"Mohon maaf permohonan belum dapat disetujui karena ada perilisan proyek penting pada tanggal tersebut.\"\n}"
+              "raw": "{\n  \"status\": \"Rejected\",\n  \"review_notes\": \"Mohon atur ulang jadwal cuti karena ada meeting penting.\"\n}"
             },
-            "url": "{{base_url}}/api/leaves/1/review",
+            "url": "{{base_url}}/api/leaves/2/review",
             "description": "HRD atau Manager menolak cuti karyawan disertai catatan alasan penolakan."
           }
         }
@@ -629,10 +629,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"employee_id\": 5,\n  \"date\": \"2026-11-23\",\n  \"check_in\": \"08:30:00\",\n  \"check_out\": \"17:30:00\",\n  \"status\": \"Hadir\",\n  \"notes\": \"Presensi manual tercatat oleh tim HRD\"\n}"
+              "raw": "{\n  \"employee_code\": \"EMP-005\",\n  \"date\": \"2026-03-15\",\n  \"check_in\": \"08:45:00\",\n  \"check_out\": \"17:15:00\",\n  \"status\": \"Hadir\",\n  \"notes\": \"Absensi dicatat manual oleh HRD\"\n}"
             },
             "url": "{{base_url}}/api/hr/attendances",
-            "description": "HRD menginputkan presensi karyawan jika karyawan lupa absen."
+            "description": "HRD mencatat absensi karyawan langsung menggunakan kode unik 'employee_code: EMP-005' tanpa perlu ID database."
           }
         },
         {
@@ -651,7 +651,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"Hadir\",\n  \"notes\": \"Koreksi setelah validasi surat tugas\"\n}"
+              "raw": "{\n  \"status\": \"Hadir\",\n  \"notes\": \"Koreksi absensi telah diverifikasi oleh HRD\"\n}"
             },
             "url": "{{base_url}}/api/hr/attendances/1",
             "description": "HRD mengubah status absensi (misal dari Alpa menjadi Hadir)."
@@ -692,10 +692,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"employee_id\": 5,\n  \"month\": \"2026-12\",\n  \"base_salary\": 8500000,\n  \"allowance\": 1500000,\n  \"deduction\": 200000,\n  \"payment_status\": \"Pending\"\n}"
+              "raw": "{\n  \"employee_code\": \"EMP-005\",\n  \"month\": \"2026-03\",\n  \"base_salary\": 12000000,\n  \"allowance\": 1500000,\n  \"deduction\": 300000,\n  \"payment_status\": \"Pending\"\n}"
             },
             "url": "{{base_url}}/api/finance/salaries",
-            "description": "Keuangan menerbitkan slip gaji bulanan karyawan."
+            "description": "Keuangan menerbitkan slip gaji karyawan menggunakan kode unik 'employee_code: EMP-005'."
           }
         },
         {
@@ -717,7 +717,7 @@
               "raw": "{\n  \"payment_status\": \"Paid\"\n}"
             },
             "url": "{{base_url}}/api/finance/salaries/1",
-            "description": "Mengubah status slip gaji menjadi Paid setelah transfer berhasil."
+            "description": "Mengubah status slip gaji menjadi 'Paid' (Sudah Dibayar)."
           }
         },
         {
@@ -813,10 +813,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"employee_id\": 5,\n  \"period\": \"2026-Q4\",\n  \"tasks_completed\": 25,\n  \"kpi_score\": 95.5,\n  \"feedback\": \"Sangat produktif dan berhasil menyelesaikan implementasi Supabase REST API tepat waktu.\"\n}"
+              "raw": "{\n  \"employee_code\": \"EMP-005\",\n  \"period\": \"2026-Q1\",\n  \"tasks_completed\": 28,\n  \"kpi_score\": 95,\n  \"feedback\": \"Performa kerja sangat memuaskan dan target sprint tercapai tepat waktu.\"\n}"
             },
             "url": "{{base_url}}/api/manager/performance-reports",
-            "description": "Manager membuat review dan nilai KPI untuk anggota tim bawahannya."
+            "description": "Manager menilai kinerja bawahan langsung menggunakan kode unik 'employee_code: EMP-005'."
           }
         },
         {
@@ -928,14 +928,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"staf_baru\",\n  \"email\": \"staf_baru@company.local\",\n  \"password\": \"password123\",\n  \"role_id\": 5,\n  \"is_active\": true\n}"
+              "raw": "{\n  \"username\": \"user_baru_{{$randomInt}}\",\n  \"email\": \"user_{{$randomInt}}@company.local\",\n  \"password\": \"password123\",\n  \"role_id\": 5\n}"
             },
             "url": "{{base_url}}/api/users",
             "description": "Admin membuat akun login user baru."
           }
         },
         {
-          "name": "11.3 Ubah Status Aktif / Role User",
+          "name": "11.3 Ubah Status Aktif / Role User (User Percobaan ID 99)",
           "request": {
             "method": "PUT",
             "header": [
@@ -952,8 +952,8 @@
               "mode": "raw",
               "raw": "{\n  \"role_id\": 5,\n  \"is_active\": true\n}"
             },
-            "url": "{{base_url}}/api/users/2",
-            "description": "Admin mengubah peran (role) atau menonaktifkan akun user."
+            "url": "{{base_url}}/api/users/99",
+            "description": "Admin mengubah status atau hak akses user percobaan (ID 99), aman dan tidak akan merusak akun Admin atau HRD."
           }
         }
       ]

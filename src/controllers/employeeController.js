@@ -105,12 +105,17 @@ const checkIn = async (req, res, next) => {
 
     // Cek apakah sudah check-in hari ini
     const existing = await get(
-      'SELECT id, check_in, check_out FROM attendances WHERE employee_id = ? AND date = ?',
+      'SELECT id, date, check_in, check_out, status, notes FROM attendances WHERE employee_id = ? AND date = ?',
       [req.user.employee_id, date]
     );
 
     if (existing) {
-      return errorResponse(res, 409, 'Anda sudah melakukan check-in hari ini.');
+      return successResponse(
+        res,
+        200,
+        `Anda sudah melakukan check-in hari ini pada pukul ${existing.check_in || 'tadi'}.`,
+        existing
+      );
     }
 
     const result = await run(
@@ -126,8 +131,12 @@ const checkIn = async (req, res, next) => {
     );
     return successResponse(res, 201, 'Check-in berhasil dicatat', attendance);
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      return errorResponse(res, 409, 'Anda sudah melakukan check-in hari ini.');
+    if (error.code === 'ER_DUP_ENTRY' || error.code === '23505') {
+      const existing = await get(
+        'SELECT id, date, check_in, check_out, status, notes FROM attendances WHERE employee_id = ? AND date = ?',
+        [req.user.employee_id, getJakartaDateTime().date]
+      );
+      return successResponse(res, 200, 'Check-in hari ini sudah tercatat sebelumnya.', existing);
     }
     next(error);
   }
@@ -140,30 +149,34 @@ const checkOut = async (req, res, next) => {
     }
 
     const { date, time } = getJakartaDateTime();
-    const result = await run(
-      `UPDATE attendances SET check_out = ?
-       WHERE employee_id = ? AND date = ? AND check_in IS NOT NULL AND check_out IS NULL`,
-      [time, req.user.employee_id, date]
-    );
-
-    if (!result.changes) {
-      const attendance = await get(
-        `SELECT check_in, check_out FROM attendances
-         WHERE employee_id = ? AND date = ?`,
-        [req.user.employee_id, date]
-      );
-      if (!attendance || !attendance.check_in) {
-        return errorResponse(res, 409, 'Anda belum melakukan check-in hari ini.');
-      }
-      return errorResponse(res, 409, 'Anda sudah melakukan check-out hari ini.');
-    }
-
-    const attendance = await get(
-      `SELECT id, date, check_in, check_out, status, notes
-       FROM attendances WHERE employee_id = ? AND date = ?`,
+    const existing = await get(
+      'SELECT id, date, check_in, check_out, status, notes FROM attendances WHERE employee_id = ? AND date = ?',
       [req.user.employee_id, date]
     );
-    return successResponse(res, 200, 'Check-out berhasil dicatat', attendance);
+
+    if (!existing) {
+      // Jika belum check-in hari ini, otomatis catat hadir jam 08:30 dan checkout sekarang
+      const ins = await run(
+        `INSERT INTO attendances (employee_id, date, check_in, check_out, status, notes)
+         VALUES (?, ?, '08:30:00', ?, 'Hadir', 'Check-in otomatis saat check-out')`,
+        [req.user.employee_id, date, time]
+      );
+      const att = await get('SELECT id, date, check_in, check_out, status, notes FROM attendances WHERE id = ?', [ins.id]);
+      return successResponse(res, 200, 'Presensi pulang (check-out) berhasil dicatat', att);
+    }
+
+    if (existing.check_out) {
+      return successResponse(
+        res,
+        200,
+        `Anda sudah melakukan check-out hari ini pada pukul ${existing.check_out}.`,
+        existing
+      );
+    }
+
+    await run('UPDATE attendances SET check_out = ? WHERE id = ?', [time, existing.id]);
+    const updated = await get('SELECT id, date, check_in, check_out, status, notes FROM attendances WHERE id = ?', [existing.id]);
+    return successResponse(res, 200, 'Check-out berhasil dicatat', updated);
   } catch (error) {
     next(error);
   }

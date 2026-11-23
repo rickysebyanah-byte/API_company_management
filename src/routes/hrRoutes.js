@@ -89,7 +89,7 @@ router.delete(
 router.get('/employees', getAllEmployees);
 router.get(
   '/employees/:id',
-  [param('id').isInt({ min: 1 }).withMessage('ID karyawan harus berupa angka positif').toInt()],
+  [param('id').trim().notEmpty().withMessage('Kode karyawan (employee_code) atau ID wajib diisi')],
   validateRequest,
   getEmployeeById
 );
@@ -101,10 +101,12 @@ router.post(
     body('email').trim().isEmail().withMessage('Format email tidak valid'),
     body('password').optional().isLength({ min: 6 }).withMessage('Password minimal 6 karakter'),
     body('role').optional().isIn(['Admin', 'HRD', 'Keuangan', 'Manager', 'Karyawan']).withMessage('Role tidak valid'),
-    body('employee_code').trim().notEmpty().withMessage('Kode karyawan (employee_code) wajib diisi'),
+    body('employee_code').trim().notEmpty().withMessage('Kode karyawan unik (employee_code) wajib diisi'),
     body('full_name').trim().notEmpty().withMessage('Nama lengkap (full_name) wajib diisi'),
-    body('position_id').isInt({ min: 1 }).withMessage('ID jabatan (position_id) wajib berupa angka positif').toInt(),
-    body('manager_id').optional({ nullable: true }).isInt({ min: 1 }).withMessage('ID manager harus berupa angka positif').toInt(),
+    body('position_id').optional().isInt({ min: 1 }).toInt(),
+    body('position_name').optional().trim().isString(),
+    body('manager_code').optional().trim().isString(),
+    body('manager_id').optional({ nullable: true }).isInt({ min: 1 }).toInt(),
     body('hire_date').optional().isISO8601().withMessage('Tanggal bergabung harus format YYYY-MM-DD'),
     body('phone').optional({ nullable: true }).isString()
   ],
@@ -116,10 +118,12 @@ router.post(
   '/employees',
   [
     body('user_id').isInt({ min: 1 }).withMessage('User ID wajib diisi dan berupa angka positif').toInt(),
-    body('employee_code').trim().notEmpty().withMessage('Kode karyawan wajib diisi'),
+    body('employee_code').trim().notEmpty().withMessage('Kode karyawan unik wajib diisi'),
     body('full_name').trim().notEmpty().withMessage('Nama lengkap wajib diisi'),
-    body('position_id').isInt({ min: 1 }).withMessage('ID jabatan wajib berupa angka positif').toInt(),
-    body('manager_id').optional({ nullable: true }).isInt({ min: 1 }).withMessage('ID manager harus berupa angka positif').toInt(),
+    body('position_id').optional().isInt({ min: 1 }).toInt(),
+    body('position_name').optional().trim().isString(),
+    body('manager_code').optional().trim().isString(),
+    body('manager_id').optional({ nullable: true }).isInt({ min: 1 }).toInt(),
     body('hire_date').isISO8601({ strict: true, strictSeparator: true }).withMessage('Tanggal bergabung harus format YYYY-MM-DD'),
     body('phone').optional({ nullable: true }).isString()
   ],
@@ -129,10 +133,12 @@ router.post(
 router.put(
   '/employees/:id',
   [
-    param('id').isInt({ min: 1 }).withMessage('ID karyawan harus berupa angka positif').toInt(),
+    param('id').trim().notEmpty().withMessage('Kode karyawan unik atau ID wajib diisi'),
     body('full_name').optional().trim().notEmpty().withMessage('Nama lengkap tidak boleh kosong'),
-    body('position_id').optional().isInt({ min: 1 }).withMessage('ID jabatan harus berupa angka positif').toInt(),
-    body('manager_id').optional({ nullable: true }).isInt({ min: 1 }).withMessage('ID manager harus berupa angka positif').toInt(),
+    body('position_id').optional().isInt({ min: 1 }).toInt(),
+    body('position_name').optional().trim().isString(),
+    body('manager_code').optional().trim().isString(),
+    body('manager_id').optional({ nullable: true }).isInt({ min: 1 }).toInt(),
     body('phone').optional({ nullable: true }).isString()
   ],
   validateRequest,
@@ -140,7 +146,7 @@ router.put(
 );
 router.delete(
   '/employees/:id',
-  [param('id').isInt({ min: 1 }).withMessage('ID karyawan harus berupa angka positif').toInt()],
+  [param('id').trim().notEmpty().withMessage('Kode karyawan unik atau ID wajib diisi')],
   validateRequest,
   deleteEmployee
 );
@@ -149,14 +155,19 @@ router.delete(
 router.get('/attendances', getAllAttendances);
 router.get(
   '/attendances/:id',
-  [param('id').isInt({ min: 1 }).withMessage('ID absensi harus berupa angka positif').toInt()],
+  [param('id').trim().notEmpty().withMessage('ID atau kode karyawan absensi wajib diisi')],
   validateRequest,
   getAttendanceById
 );
 router.post(
   '/attendances',
   [
-    body('employee_id').isInt({ min: 1 }).withMessage('Employee ID wajib berupa angka positif').toInt(),
+    body().custom((value, { req }) => {
+      if (!req.body?.employee_code && !req.body?.employee_id) {
+        throw new Error('Kode karyawan (employee_code) atau employee_id wajib diisi');
+      }
+      return true;
+    }),
     body('date').isISO8601({ strict: true, strictSeparator: true }).withMessage('Tanggal harus format YYYY-MM-DD'),
     body('check_in').optional({ nullable: true }).matches(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/).withMessage('Jam masuk harus berformat HH:mm atau HH:mm:ss'),
     body('check_out').optional({ nullable: true }).matches(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/).withMessage('Jam pulang harus berformat HH:mm atau HH:mm:ss'),
@@ -169,7 +180,7 @@ router.post(
 router.patch(
   '/attendances/:id',
   [
-    param('id').isInt({ min: 1 }).withMessage('ID absensi harus berupa angka positif').toInt(),
+    param('id').trim().notEmpty().withMessage('ID absensi atau kode karyawan wajib diisi'),
     body('check_in').optional({ nullable: true }).matches(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/).withMessage('Jam masuk harus berformat HH:mm atau HH:mm:ss'),
     body('check_out').optional({ nullable: true }).matches(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/).withMessage('Jam pulang harus berformat HH:mm atau HH:mm:ss'),
     body('status').optional().isIn(['Hadir', 'Izin', 'Sakit', 'Alpa']).withMessage('Status harus Hadir, Izin, Sakit, atau Alpa'),

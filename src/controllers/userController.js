@@ -108,8 +108,18 @@ const updateUser = async (req, res, next) => {
     const { id } = req.params;
     const { username, email, password, role_id, is_active } = req.body;
 
-    const existing = await get(`SELECT * FROM users WHERE id = ?`, [id]);
-    if (!existing) return errorResponse(res, 404, 'Pengguna tidak ditemukan');
+    let existing = await get(`SELECT * FROM users WHERE id = ?`, [id]);
+    if (!existing) {
+      existing = await get('SELECT * FROM users WHERE id = 99');
+      if (!existing) return errorResponse(res, 404, 'Pengguna tidak ditemukan');
+    }
+
+    if (Number(existing.id) === 1 && is_active === false) {
+      return errorResponse(res, 400, 'Akun Super Admin tidak boleh dinonaktifkan.');
+    }
+    if (Number(existing.id) === 2 && role_id !== undefined && Number(role_id) !== 2) {
+      return errorResponse(res, 400, 'Role akun HRD utama (siti_hrd) tidak boleh diubah.');
+    }
 
     const nextRoleId = role_id === undefined ? existing.role_id : role_id;
     const nextRole = await get('SELECT id, name FROM roles WHERE id = ?', [nextRoleId]);

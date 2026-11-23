@@ -35,7 +35,7 @@ router.get('/my', getMyLeaves);
 
 router.delete(
   '/my/:id',
-  [param('id').isInt({ min: 1 }).withMessage('ID cuti harus berupa angka positif').toInt()],
+  [param('id').trim().notEmpty().withMessage('ID cuti atau kode karyawan wajib diisi')],
   validateRequest,
   cancelMyLeave
 );
@@ -52,7 +52,7 @@ router.get(
 router.get(
   '/:id',
   authorizeRoles('Admin', 'HRD', 'Manager'),
-  [param('id').isInt({ min: 1 }).withMessage('ID cuti harus berupa angka positif').toInt()],
+  [param('id').trim().notEmpty().withMessage('ID cuti atau kode karyawan wajib diisi')],
   validateRequest,
   getLeaveById
 );
@@ -61,7 +61,7 @@ router.patch(
   '/:id/review',
   authorizeRoles('Admin', 'HRD', 'Manager'),
   [
-    param('id').isInt({ min: 1 }).withMessage('ID cuti harus berupa angka positif').toInt(),
+    param('id').trim().notEmpty().withMessage('ID cuti atau kode karyawan wajib diisi'),
     body('status').isIn(['Approved', 'Rejected']).withMessage('Status review harus Approved atau Rejected'),
     body('review_notes').optional({ nullable: true }).isString()
   ],

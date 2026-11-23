@@ -28,7 +28,12 @@ router.get(
 router.post(
   '/performance-reports',
   [
-    body('employee_id').isInt({ min: 1 }).withMessage('Employee ID wajib berupa angka positif').toInt(),
+    body().custom((value, { req }) => {
+      if (!req.body?.employee_code && !req.body?.employee_id) {
+        throw new Error('Kode karyawan unik (employee_code) atau employee_id wajib diisi');
+      }
+      return true;
+    }),
     body('period').trim().notEmpty().withMessage('Periode wajib diisi (contoh: 2026-Q4)'),
     body('tasks_completed').optional().isInt({ min: 0 }).withMessage('Jumlah tugas harus angka bulat non-negatif').toInt(),
     body('kpi_score').isFloat({ min: 0, max: 100 }).withMessage('KPI score harus angka antara 0 dan 100').toFloat(),

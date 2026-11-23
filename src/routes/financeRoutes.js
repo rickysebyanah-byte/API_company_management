@@ -32,7 +32,12 @@ router.get(
 router.post(
   '/salaries',
   [
-    body('employee_id').isInt({ min: 1 }).withMessage('Employee ID wajib berupa angka positif').toInt(),
+    body().custom((value, { req }) => {
+      if (!req.body?.employee_code && !req.body?.employee_id) {
+        throw new Error('Kode karyawan unik (employee_code) atau employee_id wajib diisi');
+      }
+      return true;
+    }),
     body('month').matches(/^\d{4}-(0[1-9]|1[0-2])$/).withMessage('Format bulan harus YYYY-MM (contoh: 2026-11)'),
     body('base_salary').isFloat({ min: 0 }).withMessage('Gaji pokok harus angka positif').toFloat(),
     body('allowance').optional().isFloat({ min: 0 }).withMessage('Tunjangan tidak boleh negatif').toFloat(),

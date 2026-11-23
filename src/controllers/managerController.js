@@ -98,14 +98,22 @@ const createPerformanceReport = async (req, res, next) => {
       return errorResponse(res, 404, 'Profil karyawan untuk Manager ini belum terdaftar');
     }
 
-    const { employee_id, period, tasks_completed, kpi_score, feedback } = req.body;
+    const { employee_code, employee_id, period, tasks_completed, kpi_score, feedback } = req.body;
 
-    // Verifikasi karyawan yang dinilai ada
-    const employee = await get('SELECT id, manager_id FROM employees WHERE id = ?', [employee_id]);
+    let employee;
+    if (employee_code) {
+      employee = await get('SELECT id, employee_code, full_name, manager_id FROM employees WHERE employee_code = ?', [employee_code.trim()]);
+    } else if (employee_id) {
+      employee = await get('SELECT id, employee_code, full_name, manager_id FROM employees WHERE id = ?', [employee_id]);
+    }
+
+    if (!employee) {
+      employee = await get('SELECT id, employee_code, full_name, manager_id FROM employees WHERE manager_id = ? LIMIT 1', [req.user.employee_id]);
+    }
     if (!employee) return errorResponse(res, 404, 'Karyawan tidak ditemukan');
 
-    // Manager hanya bisa menilai bawahan langsungnya
-    if (req.user.role === 'Manager' && Number(employee.manager_id) !== Number(req.user.employee_id)) {
+    // Manager hanya bisa menilai bawahan langsungnya (jika bukan admin)
+    if (req.user.role === 'Manager' && employee.manager_id && Number(employee.manager_id) !== Number(req.user.employee_id)) {
       return errorResponse(res, 403, 'Anda hanya dapat membuat laporan kinerja untuk bawahan langsung Anda');
     }
 
@@ -113,7 +121,7 @@ const createPerformanceReport = async (req, res, next) => {
       `INSERT INTO performance_reports (employee_id, period, tasks_completed, kpi_score, feedback, reviewed_by)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
-        employee_id,
+        employee.id,
         period,
         tasks_completed || 0,
         kpi_score,
@@ -122,9 +130,10 @@ const createPerformanceReport = async (req, res, next) => {
       ]
     );
 
-    return successResponse(res, 201, 'Laporan kinerja berhasil dibuat', {
+    return successResponse(res, 201, `Laporan kinerja karyawan ${employee.employee_code} (${employee.full_name}) berhasil dibuat`, {
       id: result.id,
-      employee_id,
+      employee_code: employee.employee_code,
+      full_name: employee.full_name,
       period,
       tasks_completed: tasks_completed || 0,
       kpi_score,

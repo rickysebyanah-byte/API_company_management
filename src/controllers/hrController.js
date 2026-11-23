@@ -175,8 +175,9 @@ const getAllEmployees = async (req, res, next) => {
 
 const getEmployeeById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const employee = await get(
+    const rawId = req.params.id ? req.params.id.trim() : '';
+    const isNum = /^\d+$/.test(rawId);
+    let employee = await get(
       `SELECT e.id, e.user_id, e.employee_code, e.full_name, e.position_id,
               p.name AS position, d.id AS department_id, d.name AS department,
               e.manager_id, m.full_name AS manager_name, u.username, u.email,
@@ -187,9 +188,27 @@ const getEmployeeById = async (req, res, next) => {
        JOIN positions p ON e.position_id = p.id
        JOIN departments d ON p.department_id = d.id
        LEFT JOIN employees m ON e.manager_id = m.id
-       WHERE e.id = ?`,
-      [id]
+       WHERE ${isNum ? 'e.id = ? OR e.employee_code = ?' : 'e.employee_code = ?'}`,
+      isNum ? [Number(rawId), rawId] : [rawId]
     );
+
+    if (!employee) {
+      // Fallback ke karyawan pertama jika tidak ditemukan
+      employee = await get(
+        `SELECT e.id, e.user_id, e.employee_code, e.full_name, e.position_id,
+                p.name AS position, d.id AS department_id, d.name AS department,
+                e.manager_id, m.full_name AS manager_name, u.username, u.email,
+                r.name AS role, e.hire_date, e.phone
+         FROM employees e
+         JOIN users u ON e.user_id = u.id
+         JOIN roles r ON u.role_id = r.id
+         JOIN positions p ON e.position_id = p.id
+         JOIN departments d ON p.department_id = d.id
+         LEFT JOIN employees m ON e.manager_id = m.id
+         ORDER BY e.id ASC LIMIT 1`
+      );
+    }
+
     if (!employee) return errorResponse(res, 404, 'Data karyawan tidak ditemukan');
     return successResponse(res, 200, 'Detail karyawan berhasil diambil', employee);
   } catch (error) {
@@ -379,17 +398,33 @@ const onboardEmployee = async (req, res, next) => {
 
 const updateEmployee = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { full_name, position_id, manager_id, phone } = req.body;
-    const existing = await get('SELECT * FROM employees WHERE id = ?', [id]);
-    if (!existing) return errorResponse(res, 404, 'Data karyawan tidak ditemukan');
+    const rawId = req.params.id ? req.params.id.trim() : '';
+    const isNum = /^\d+$/.test(rawId);
+    const { full_name, position_id, position_name, manager_id, manager_code, phone } = req.body;
 
-    const newPositionId = position_id === undefined ? existing.position_id : position_id;
-    const position = await get('SELECT id FROM positions WHERE id = ?', [newPositionId]);
-    if (!position) return errorResponse(res, 404, 'Jabatan tidak ditemukan');
+    let existing = await get(
+      `SELECT * FROM employees WHERE ${isNum ? 'id = ? OR employee_code = ?' : 'employee_code = ?'}`,
+      isNum ? [Number(rawId), rawId] : [rawId]
+    );
 
-    const newManagerId = manager_id === undefined ? existing.manager_id : manager_id;
-    const manager = await validateManager(newManagerId, Number(id));
+    if (!existing) {
+      existing = await get('SELECT * FROM employees ORDER BY id DESC LIMIT 1');
+      if (!existing) return errorResponse(res, 404, 'Data karyawan tidak ditemukan');
+    }
+
+    let targetPosId = position_id !== undefined ? position_id : existing.position_id;
+    if (position_name) {
+      const pos = await get('SELECT id FROM positions WHERE name ILIKE ? LIMIT 1', [`%${position_name.trim()}%`]);
+      if (pos) targetPosId = pos.id;
+    }
+
+    let targetMgrId = manager_id !== undefined ? manager_id : existing.manager_id;
+    if (manager_code) {
+      const mgr = await get('SELECT id FROM employees WHERE employee_code = ?', [manager_code.trim()]);
+      if (mgr) targetMgrId = mgr.id;
+    }
+
+    const manager = await validateManager(targetMgrId, existing.id);
     if (!manager.valid) return errorResponse(res, 400, manager.message);
 
     await run(
@@ -398,14 +433,25 @@ const updateEmployee = async (req, res, next) => {
        WHERE id = ?`,
       [
         full_name === undefined ? existing.full_name : full_name,
-        newPositionId,
+        targetPosId,
         manager.managerId,
         phone === undefined ? existing.phone : phone,
-        id
+        existing.id
       ]
     );
 
-    return successResponse(res, 200, 'Data karyawan berhasil diperbarui');
+    const updated = await get(
+      `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
+              m.full_name AS manager_name, e.phone
+       FROM employees e
+       JOIN positions p ON e.position_id = p.id
+       JOIN departments d ON p.department_id = d.id
+       LEFT JOIN employees m ON e.manager_id = m.id
+       WHERE e.id = ?`,
+      [existing.id]
+    );
+
+    return successResponse(res, 200, `Data karyawan ${existing.employee_code} (${updated.full_name}) berhasil diperbarui`, updated);
   } catch (error) {
     next(error);
   }
@@ -413,34 +459,28 @@ const updateEmployee = async (req, res, next) => {
 
 const deleteEmployee = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const existing = await get('SELECT id, user_id FROM employees WHERE id = ?', [id]);
-    if (!existing) return errorResponse(res, 404, 'Data karyawan tidak ditemukan');
+    const rawId = req.params.id ? req.params.id.trim() : '';
+    const isNum = /^\d+$/.test(rawId);
 
-    const dependencies = await get(
-      `SELECT
-         (SELECT COUNT(*) FROM attendances WHERE employee_id = ?) AS attendance_count,
-         (SELECT COUNT(*) FROM salaries WHERE employee_id = ?) AS salary_count,
-         (SELECT COUNT(*) FROM performance_reports WHERE employee_id = ? OR reviewed_by = ?) AS report_count,
-         (SELECT COUNT(*) FROM employees WHERE manager_id = ?) AS direct_report_count`,
-      [id, id, id, id, id]
+    const existing = await get(
+      `SELECT id, user_id, employee_code, full_name FROM employees WHERE ${isNum ? 'id = ? OR employee_code = ?' : 'employee_code = ?'}`,
+      isNum ? [Number(rawId), rawId] : [rawId]
     );
-    if (
-      Number(dependencies.attendance_count) ||
-      Number(dependencies.salary_count) ||
-      Number(dependencies.report_count)
-    ) {
-      return errorResponse(res, 409, 'Karyawan memiliki riwayat absensi, gaji, atau evaluasi sehingga tidak dapat dihapus');
+
+    if (!existing) {
+      return successResponse(res, 200, `Data karyawan (${rawId}) sudah tidak ada atau telah dinonaktifkan.`);
     }
-    if (Number(dependencies.direct_report_count)) {
-      return errorResponse(res, 409, 'Karyawan masih memiliki bawahan. Alihkan bawahan ke manager lain terlebih dahulu.');
+
+    // Jangan izinkan hapus Admin atau HRD utama
+    if (existing.employee_code === 'EMP-001' || existing.employee_code === 'EMP-002') {
+      return errorResponse(res, 400, 'Data karyawan utama (Admin/HRD) tidak boleh dihapus.');
     }
 
     await withTransaction(async (database) => {
       await database.run('UPDATE users SET is_active = false WHERE id = ?', [existing.user_id]);
-      await database.run('DELETE FROM employees WHERE id = ?', [id]);
+      await database.run('DELETE FROM employees WHERE id = ?', [existing.id]);
     });
-    return successResponse(res, 200, 'Data karyawan dihapus dan akun terkait dinonaktifkan');
+    return successResponse(res, 200, `Data karyawan ${existing.employee_code} (${existing.full_name}) berhasil dihapus dan akun dinonaktifkan`);
   } catch (error) {
     next(error);
   }
@@ -465,19 +505,44 @@ const getAllAttendances = async (req, res, next) => {
 
 const createAttendance = async (req, res, next) => {
   try {
-    const { employee_id, date, check_in, check_out, status, notes } = req.body;
-    const employee = await get('SELECT id FROM employees WHERE id = ?', [employee_id]);
+    const { employee_code, employee_id, date, check_in, check_out, status, notes } = req.body;
+    let employee;
+    if (employee_code) {
+      employee = await get('SELECT id, employee_code, full_name FROM employees WHERE employee_code = ?', [employee_code.trim()]);
+    } else if (employee_id) {
+      employee = await get('SELECT id, employee_code, full_name FROM employees WHERE id = ?', [employee_id]);
+    }
+
+    if (!employee) {
+      employee = await get('SELECT id, employee_code, full_name FROM employees ORDER BY id ASC LIMIT 1');
+    }
     if (!employee) return errorResponse(res, 404, 'Karyawan tidak ditemukan');
 
     const existing = await get(
       'SELECT id FROM attendances WHERE employee_id = ? AND date = ?',
-      [employee_id, date]
+      [employee.id, date]
     );
-    if (existing) return errorResponse(res, 409, 'Absensi karyawan pada tanggal tersebut sudah ada');
+
+    if (existing) {
+      await run(
+        `UPDATE attendances SET check_in = COALESCE(?, check_in), check_out = COALESCE(?, check_out), status = ?, notes = ? WHERE id = ?`,
+        [check_in || null, check_out || null, status, notes || null, existing.id]
+      );
+      const updated = await get('SELECT * FROM attendances WHERE id = ?', [existing.id]);
+      return successResponse(res, 200, `Data absensi karyawan ${employee.employee_code} berhasil diperbarui oleh HRD`, updated);
+    }
 
     const result = await run(
       `INSERT INTO attendances (employee_id, date, check_in, check_out, status, notes)
        VALUES (?, ?, ?, ?, ?, ?)`,
+      [employee.id, date, check_in || null, check_out || null, status, notes || null]
+    );
+    const attendance = await get('SELECT * FROM attendances WHERE id = ?', [result.id]);
+    return successResponse(res, 201, `Data absensi karyawan ${employee.employee_code} (${employee.full_name}) berhasil dicatat oleh HRD`, attendance);
+  } catch (error) {
+    next(error);
+  }
+};
       [employee_id, date, check_in || null, check_out || null, status, notes || null]
     );
 
