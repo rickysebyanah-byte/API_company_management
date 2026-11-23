@@ -18,7 +18,7 @@ router.use(authenticate);
 
 // 1. Karyawan mengajukan & melihat cuti sendiri (Semua role yang punya profil)
 router.post(
-  '/apply',
+  ['/', '/apply'],
   [
     body('employee_code').optional().trim().isString(),
     body('leave_type')
@@ -58,16 +58,40 @@ router.get(
   getLeaveById
 );
 
-router.patch(
-  '/:id/review',
-  authorizeRoles('Admin', 'HRD', 'Manager'),
-  [
-    param('id').trim().notEmpty().withMessage('ID cuti atau kode karyawan wajib diisi'),
-    body('status').isIn(['Approved', 'Rejected']).withMessage('Status review harus Approved atau Rejected'),
-    body('review_notes').optional({ nullable: true }).isString()
-  ],
-  validateRequest,
-  reviewLeave
-);
+// 3. HRD & Manager review cuti (mendukung PATCH maupun PUT, serta status Approved/Disetujui/Rejected/Ditolak)
+router.route('/:id/review')
+  .all(authorizeRoles('Admin', 'HRD', 'Manager'))
+  .patch(
+    [
+      param('id').trim().notEmpty().withMessage('ID cuti atau kode karyawan wajib diisi'),
+      body('status').customSanitizer(val => {
+        if (!val) return val;
+        const lower = String(val).toLowerCase();
+        if (lower === 'disetujui' || lower === 'approved' || lower === 'approve') return 'Approved';
+        if (lower === 'ditolak' || lower === 'rejected' || lower === 'reject') return 'Rejected';
+        return val;
+      }).isIn(['Approved', 'Rejected']).withMessage('Status review harus Approved/Disetujui atau Rejected/Ditolak'),
+      body('review_notes').optional({ nullable: true }).isString(),
+      body('rejection_reason').optional({ nullable: true }).isString()
+    ],
+    validateRequest,
+    reviewLeave
+  )
+  .put(
+    [
+      param('id').trim().notEmpty().withMessage('ID cuti atau kode karyawan wajib diisi'),
+      body('status').customSanitizer(val => {
+        if (!val) return val;
+        const lower = String(val).toLowerCase();
+        if (lower === 'disetujui' || lower === 'approved' || lower === 'approve') return 'Approved';
+        if (lower === 'ditolak' || lower === 'rejected' || lower === 'reject') return 'Rejected';
+        return val;
+      }).isIn(['Approved', 'Rejected']).withMessage('Status review harus Approved/Disetujui atau Rejected/Ditolak'),
+      body('review_notes').optional({ nullable: true }).isString(),
+      body('rejection_reason').optional({ nullable: true }).isString()
+    ],
+    validateRequest,
+    reviewLeave
+  );
 
 module.exports = router;
