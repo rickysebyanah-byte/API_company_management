@@ -96,10 +96,12 @@ app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
   console.error('[Server Error]:', err);
   const statusCode = err.status || err.statusCode || 500;
-  const message = statusCode < 500
-    ? err.message
-    : 'Terjadi kesalahan internal pada server.';
-  return errorResponse(res, statusCode, message);
+  return res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Terjadi kesalahan pada server.',
+    code: err.code || undefined,
+    detail: err.detail || undefined
+  });
 });
 
 module.exports = app;
