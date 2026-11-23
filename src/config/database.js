@@ -11,9 +11,16 @@ types.setTypeParser(20, (val) => (val === null ? null : parseInt(val, 10)));
 
 // Konfigurasi Pool PostgreSQL / Supabase (IPv4 Compatible Pooler)
 const defaultDatabaseUrl = 'postgresql://postgres.ppricjddcaulleumngva:kijiosia123@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres';
-const connectionString = (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() && !process.env.DATABASE_URL.includes('[YOUR-DATABASE-PASSWORD]'))
-  || (process.env.SUPABASE_DATABASE_URL && process.env.SUPABASE_DATABASE_URL.trim())
-  || defaultDatabaseUrl;
+
+function getConnectionString() {
+  const envUrl = process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL;
+  if (typeof envUrl === 'string' && envUrl.trim().length > 0 && !envUrl.includes('[YOUR-DATABASE-PASSWORD]')) {
+    return envUrl.trim();
+  }
+  return defaultDatabaseUrl;
+}
+
+const connectionString = getConnectionString();
 
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = 'super_secret_jwt_key_2026_enterprise_company_api';
