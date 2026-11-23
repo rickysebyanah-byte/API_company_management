@@ -11,18 +11,33 @@
       "type": "string"
     },
     {
-      "key": "token",
-      "value": "",
+      "key": "hrd_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQzMTMzLCJleHAiOjE4MjY5NzkxMzN9.kpfzLPsbzSXJrcySLkB6xvdwDyFCl7QOYIAPWf40Fig",
       "type": "string"
     },
     {
-      "key": "hrd_token",
-      "value": "",
+      "key": "admin_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImVtcGxveWVlX2lkIjoxLCJpYXQiOjE3OTU0NDMxMzMsImV4cCI6MTgyNjk3OTEzM30.2Gc90bR16dYO5VxjHl3f0_gNLxKJ1rFuew9MibroaQA",
+      "type": "string"
+    },
+    {
+      "key": "keuangan_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhbmRpX2tldWFuZ2FuIiwicm9sZSI6IktldWFuZ2FuIiwiZW1wbG95ZWVfaWQiOjMsImlhdCI6MTc5NTQ0MzEzMywiZXhwIjoxODI2OTc5MTMzfQ.NhWjtvkZraB_SM4f8EZgvJVJjz84xLFPJ24-xLq97DA",
+      "type": "string"
+    },
+    {
+      "key": "manager_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJidWRpX21hbmFnZXIiLCJyb2xlIjoiTWFuYWdlciIsImVtcGxveWVlX2lkIjo0LCJpYXQiOjE3OTU0NDMxMzMsImV4cCI6MTgyNjk3OTEzM30.4PUzmifXQeEheTPdF8s_iOxBE6t6QOlNMhtLdRT73L8",
       "type": "string"
     },
     {
       "key": "karyawan_token",
-      "value": "",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJyaW5hX2RldiIsInJvbGUiOiJLYXJ5YXdhbiIsImVtcGxveWVlX2lkIjo1LCJpYXQiOjE3OTU0NDMxMzMsImV4cCI6MTgyNjk3OTEzM30.TweeNR_OgQYDh2Rk0uzznn7QC2ZV1DsNDaUqSLe8fMI",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQzMTMzLCJleHAiOjE4MjY5NzkxMzN9.kpfzLPsbzSXJrcySLkB6xvdwDyFCl7QOYIAPWf40Fig",
       "type": "string"
     },
     {
@@ -50,9 +65,8 @@
                   "if (pm.response.code === 200) {",
                   "    var json = pm.response.json();",
                   "    if (json.data && json.data.token) {",
-                  "        pm.environment.set('token', json.data.token);",
                   "        pm.environment.set('hrd_token', json.data.token);",
-                  "        pm.environment.set('role', 'HRD');",
+                  "        pm.environment.set('token', json.data.token);",
                   "    }",
                   "}"
                 ],
@@ -83,10 +97,12 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.token) {",
-                  "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data && json.data.token) {",
+                  "        pm.environment.set('admin_token', json.data.token);",
+                  "        pm.environment.set('token', json.data.token);",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -116,10 +132,12 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.token) {",
-                  "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data && json.data.token) {",
+                  "        pm.environment.set('manager_token', json.data.token);",
+                  "        pm.environment.set('token', json.data.token);",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -149,10 +167,12 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.token) {",
-                  "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data && json.data.token) {",
+                  "        pm.environment.set('keuangan_token', json.data.token);",
+                  "        pm.environment.set('token', json.data.token);",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -182,10 +202,12 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.token) {",
-                  "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data && json.data.token) {",
+                  "        pm.environment.set('karyawan_token', json.data.token);",
+                  "        pm.environment.set('token', json.data.token);",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -233,7 +255,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "body": {
@@ -252,16 +274,14 @@
                   "    var json = pm.response.json();",
                   "    if (json.data) {",
                   "        if (json.data.token) {",
-                  "            // Otomatis aktifkan token karyawan baru untuk request berikutnya (seperti ajukan cuti)",
-                  "            pm.environment.set('token', json.data.token);",
+                  "            // Simpan token karyawan baru ke variabel karyawan_token & karyawan_baru_token",
+                  "            // JANGAN pernah merusak atau menimpa hrd_token!",
                   "            pm.environment.set('karyawan_token', json.data.token);",
+                  "            pm.environment.set('karyawan_baru_token', json.data.token);",
                   "        }",
                   "        if (json.data.employee_code) {",
                   "            pm.environment.set('employee_code', json.data.employee_code);",
                   "            pm.environment.set('karyawan_baru_code', json.data.employee_code);",
-                  "        }",
-                  "        if (json.data.full_name) {",
-                  "            pm.environment.set('karyawan_nama', json.data.full_name);",
                   "        }",
                   "    }",
                   "}"
@@ -278,7 +298,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "url": "{{base_url}}/api/hr/employees",
@@ -292,7 +312,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "url": "{{base_url}}/api/hr/employees/EMP-005",
@@ -310,7 +330,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "body": {
@@ -328,7 +348,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "url": "{{base_url}}/api/hr/employees/EMP-099",
@@ -351,7 +371,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "body": {
@@ -385,7 +405,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "url": "{{base_url}}/api/leaves/my",
@@ -399,7 +419,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "url": "{{base_url}}/api/leaves/my/3",
@@ -413,7 +433,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "url": "{{base_url}}/api/leaves?status=Pending",
@@ -480,7 +500,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "body": {
@@ -502,7 +522,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "body": {
@@ -520,7 +540,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "url": "{{base_url}}/api/me/attendances?page=1&limit=10",
@@ -534,7 +554,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "url": "{{base_url}}/api/me/profile",
@@ -552,7 +572,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "body": {
@@ -574,7 +594,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{karyawan_token}}"
               }
             ],
             "body": {
@@ -597,7 +617,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "url": "{{base_url}}/api/hr/departments",
@@ -615,7 +635,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "body": {
@@ -633,7 +653,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "url": "{{base_url}}/api/hr/positions",
@@ -651,7 +671,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "body": {
@@ -674,7 +694,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "url": "{{base_url}}/api/hr/attendances?page=1&limit=20",
@@ -692,7 +712,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "body": {
@@ -714,7 +734,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "body": {
@@ -737,7 +757,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{keuangan_token}}"
               }
             ],
             "url": "{{base_url}}/api/finance/salaries",
@@ -755,7 +775,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{keuangan_token}}"
               }
             ],
             "body": {
@@ -777,7 +797,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{keuangan_token}}"
               }
             ],
             "body": {
@@ -799,7 +819,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{keuangan_token}}"
               }
             ],
             "body": {
@@ -821,7 +841,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{keuangan_token}}"
               }
             ],
             "body": {
@@ -839,7 +859,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{keuangan_token}}"
               }
             ],
             "url": "{{base_url}}/api/finance/reports",
@@ -858,7 +878,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{manager_token}}"
               }
             ],
             "url": "{{base_url}}/api/manager/team",
@@ -876,7 +896,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{manager_token}}"
               }
             ],
             "body": {
@@ -894,7 +914,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{manager_token}}"
               }
             ],
             "url": "{{base_url}}/api/manager/performance-reports",
@@ -973,7 +993,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{admin_token}}"
               }
             ],
             "url": "{{base_url}}/api/users?page=1&limit=10",
@@ -991,7 +1011,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{admin_token}}"
               }
             ],
             "body": {
@@ -1013,7 +1033,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{admin_token}}"
               }
             ],
             "body": {

@@ -10,15 +10,16 @@ const authorizeRoles = (...allowedRoles) => {
       return errorResponse(res, 401, 'Pengguna belum terautentikasi.');
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
-      return errorResponse(
-        res,
-        403,
-        `Akses ditolak (Forbidden). Role '${req.user.role}' tidak memiliki izin untuk mengakses fitur ini.`
-      );
+    // Admin selalu memiliki akses ke seluruh fitur sistem (Superuser)
+    if (req.user.role === 'Admin' || allowedRoles.includes(req.user.role)) {
+      return next();
     }
 
-    next();
+    return errorResponse(
+      res,
+      403,
+      `Akses ditolak (Forbidden). Anda sedang menggunakan token dengan Role '${req.user.role}'. Fitur ini khusus untuk Role: ${allowedRoles.join(', ')}.`
+    );
   };
 };
 
