@@ -34,7 +34,7 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '1mb' }));
 
 // Root REST API Endpoint
-app.get('/', (req, res) => {
+app.get(['/', '/api'], (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Company Management REST API berjalan dengan baik.',
@@ -55,7 +55,7 @@ app.get('/', (req, res) => {
 });
 
 // Health Check Endpoint
-app.get('/health', async (req, res) => {
+app.get(['/health', '/api/health'], async (req, res) => {
   try {
     await get('SELECT 1 AS database_ready');
     return res.status(200).json({
