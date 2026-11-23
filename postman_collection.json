@@ -1,13 +1,13 @@
 {
   "info": {
-    "name": "Company Management REST API (Supabase & PostgreSQL)",
-    "description": "Koleksi Postman Enterprise REST API Sistem Manajemen Perusahaan dengan Role-Based Access Control (RBAC), JWT Authentication, dan Cloud Supabase PostgreSQL.\n\nAkun Demo:\n- admin / password123 (role: Admin)\n- siti_hrd / password123 (role: HRD)\n- andi_keuangan / password123 (role: Keuangan)\n- budi_manager / password123 (role: Manager)\n- rina_dev / password123 (role: Karyawan)\n- dimas_qa / password123 (role: Karyawan)",
+    "name": "Company Management REST API (Bahasa Indonesia Lengkap)",
+    "description": "Koleksi Postman Resmi Sistem Manajemen Perusahaan dengan Cloud Database Supabase PostgreSQL, Role-Based Access Control (RBAC), dan JWT.\n\nPanduan Cepat:\n1. Buka folder '1. Login Akun' -> pilih peran yang diinginkan -> klik Send. Token akan otomatis tersimpan!\n2. HRD dapat menerima karyawan baru di folder '2. HRD - Penerimaan Karyawan Baru'.\n3. Karyawan dapat langsung mengajukan cuti di folder '3. Pengajuan & Persetujuan Cuti'.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:3000"
+      "value": "https://api-company-management.vercel.app"
     },
     {
       "key": "token",
@@ -16,26 +16,10 @@
   ],
   "item": [
     {
-      "name": "1. Auth & System",
+      "name": "1. Login Akun (Pilih Akun & Token Otomatis Tersimpan)",
       "item": [
         {
-          "name": "Root API Specification",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{base_url}}/"
-          }
-        },
-        {
-          "name": "Health Check",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{base_url}}/health"
-          }
-        },
-        {
-          "name": "Login (Admin)",
+          "name": "1.1 Login sebagai HRD (siti_hrd)",
           "event": [
             {
               "listen": "test",
@@ -44,39 +28,7 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.data && jsonData.data.token) {",
                   "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token Admin tersimpan');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
-            },
-            "url": "{{base_url}}/api/auth/login"
-          }
-        },
-        {
-          "name": "Login (HRD - siti_hrd)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.token) {",
-                  "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token HRD tersimpan');",
+                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -95,11 +47,12 @@
               "mode": "raw",
               "raw": "{\n  \"username\": \"siti_hrd\",\n  \"password\": \"password123\"\n}"
             },
-            "url": "{{base_url}}/api/auth/login"
+            "url": "{{base_url}}/api/auth/login",
+            "description": "Gunakan request ini untuk login sebagai HRD. Hak akses: Menerima karyawan baru, mengelola absensi, departemen, jabatan, dan menyetujui cuti."
           }
         },
         {
-          "name": "Login (Keuangan - andi_keuangan)",
+          "name": "1.2 Login sebagai Admin (admin)",
           "event": [
             {
               "listen": "test",
@@ -108,7 +61,7 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.data && jsonData.data.token) {",
                   "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token Keuangan tersimpan');",
+                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -125,13 +78,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"andi_keuangan\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
             },
-            "url": "{{base_url}}/api/auth/login"
+            "url": "{{base_url}}/api/auth/login",
+            "description": "Gunakan request ini untuk login sebagai Super Admin. Hak akses: Semua endpoint di seluruh sistem."
           }
         },
         {
-          "name": "Login (Manager - budi_manager)",
+          "name": "1.3 Login sebagai Manager (budi_manager)",
           "event": [
             {
               "listen": "test",
@@ -140,7 +94,7 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.data && jsonData.data.token) {",
                   "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token Manager tersimpan');",
+                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -159,11 +113,12 @@
               "mode": "raw",
               "raw": "{\n  \"username\": \"budi_manager\",\n  \"password\": \"password123\"\n}"
             },
-            "url": "{{base_url}}/api/auth/login"
+            "url": "{{base_url}}/api/auth/login",
+            "description": "Login sebagai Manager tim Engineering. Hak akses: Melihat bawahan langsung, review KPI, dan menyetujui cuti bawahan."
           }
         },
         {
-          "name": "Login (Karyawan - rina_dev)",
+          "name": "1.4 Login sebagai Keuangan (andi_keuangan)",
           "event": [
             {
               "listen": "test",
@@ -172,7 +127,40 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.data && jsonData.data.token) {",
                   "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token Karyawan tersimpan');",
+                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"andi_keuangan\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login",
+            "description": "Login sebagai Staf Keuangan. Hak akses: Kelola slip gaji karyawan, catat kas masuk/keluar, dan laporan saldo bersih."
+          }
+        },
+        {
+          "name": "1.5 Login sebagai Karyawan (rina_dev)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.token);",
+                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -191,55 +179,26 @@
               "mode": "raw",
               "raw": "{\n  \"username\": \"rina_dev\",\n  \"password\": \"password123\"\n}"
             },
-            "url": "{{base_url}}/api/auth/login"
+            "url": "{{base_url}}/api/auth/login",
+            "description": "Login sebagai Karyawan. Hak akses: Ajukan cuti, presensi masuk/pulang, lihat profil sendiri."
+          }
+        },
+        {
+          "name": "1.6 Cek Server & Koneksi Database (Health Check)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health",
+            "description": "Memeriksa status server Vercel dan koneksi ke Cloud Supabase secara real-time."
           }
         }
       ]
     },
     {
-      "name": "2. Admin - Manajemen Users",
+      "name": "2. HRD - Penerimaan Karyawan Baru (Onboarding)",
       "item": [
         {
-          "name": "Get All Roles",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/users/roles"
-          }
-        },
-        {
-          "name": "Get Users (Paginated & Filter)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/users?page=1&limit=10"
-          }
-        },
-        {
-          "name": "Get User By ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/users/1"
-          }
-        },
-        {
-          "name": "Create User",
+          "name": "2.1 [TOMBOL HRD] Terima Karyawan Baru (Buat Akun & Profil Sekaligus)",
           "request": {
             "method": "POST",
             "header": [
@@ -254,13 +213,42 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"user_baru\",\n  \"email\": \"user_baru@company.local\",\n  \"password\": \"password123\",\n  \"role_id\": 5,\n  \"is_active\": true\n}"
+              "raw": "{\n  \"username\": \"joko_backend\",\n  \"email\": \"joko@company.local\",\n  \"password\": \"password123\",\n  \"role\": \"Karyawan\",\n  \"employee_code\": \"EMP-007\",\n  \"full_name\": \"Joko Widodo Pratama\",\n  \"position_id\": 5,\n  \"manager_id\": 4,\n  \"hire_date\": \"2026-11-23\",\n  \"phone\": \"081234567890\"\n}"
             },
-            "url": "{{base_url}}/api/users"
+            "url": "{{base_url}}/api/hr/employees/onboard",
+            "description": "INILAH TOMBOL HRD UNTUK MENERIMA KARYAWAN BARU! Dalam 1 langkah, sistem langsung membuatkan akun login + profil karyawan lengkap. Karyawan ini bisa langsung login dan langsung bisa ajukan cuti!"
           }
         },
         {
-          "name": "Update User",
+          "name": "2.2 Lihat Semua Karyawan Lengkap",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/hr/employees",
+            "description": "Melihat daftar seluruh karyawan perusahaan beserta jabatannya."
+          }
+        },
+        {
+          "name": "2.3 Lihat Detail Karyawan (Berdasarkan ID)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/hr/employees/1",
+            "description": "Melihat informasi lengkap satu orang karyawan berdasarkan ID-nya."
+          }
+        },
+        {
+          "name": "2.4 Ubah Data Karyawan (Jabatan / Telepon / Atasan)",
           "request": {
             "method": "PUT",
             "header": [
@@ -275,13 +263,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user_updated@company.local\",\n  \"role_id\": 5,\n  \"is_active\": true\n}"
+              "raw": "{\n  \"full_name\": \"Rina Kartika Putri\",\n  \"position_id\": 5,\n  \"manager_id\": 4,\n  \"phone\": \"081298765432\"\n}"
             },
-            "url": "{{base_url}}/api/users/2"
+            "url": "{{base_url}}/api/hr/employees/5",
+            "description": "HRD mengubah informasi jabatan atau nomor telepon karyawan."
           }
         },
         {
-          "name": "Delete User",
+          "name": "2.5 Nonaktifkan / Hapus Karyawan",
           "request": {
             "method": "DELETE",
             "header": [
@@ -290,29 +279,17 @@
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/users/99"
+            "url": "{{base_url}}/api/hr/employees/99",
+            "description": "Menghapus profil karyawan dan menonaktifkan akun login terkait secara aman."
           }
         }
       ]
     },
     {
-      "name": "3. HRD - Departemen & Jabatan",
+      "name": "3. Pengajuan & Persetujuan Cuti (Alur Lengkap)",
       "item": [
         {
-          "name": "Get Departments",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/hr/departments"
-          }
-        },
-        {
-          "name": "Create Department",
+          "name": "3.1 [Karyawan] Ajukan Permohonan Cuti Baru",
           "request": {
             "method": "POST",
             "header": [
@@ -327,13 +304,28 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Research & AI Innovation\",\n  \"description\": \"Departemen khusus riset Machine Learning dan otomatisasi\"\n}"
+              "raw": "{\n  \"leave_type\": \"Cuti Tahunan\",\n  \"start_date\": \"2026-12-15\",\n  \"end_date\": \"2026-12-17\",\n  \"reason\": \"Acara keluarga dan liburan akhir tahun\"\n}"
             },
-            "url": "{{base_url}}/api/hr/departments"
+            "url": "{{base_url}}/api/leaves/apply",
+            "description": "Karyawan mengajukan cuti. Pilihan leave_type: 'Cuti Tahunan', 'Sakit', 'Izin Penting', 'Melahirkan', 'Lainnya'."
           }
         },
         {
-          "name": "Delete Department",
+          "name": "3.2 [Karyawan] Lihat Riwayat Pengajuan Cuti Saya",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/leaves/my",
+            "description": "Karyawan melihat status seluruh pengajuan cutinya (Pending, Approved, atau Rejected)."
+          }
+        },
+        {
+          "name": "3.3 [Karyawan] Batalkan Pengajuan Cuti Saya (Jika Masih Pending)",
           "request": {
             "method": "DELETE",
             "header": [
@@ -342,11 +334,12 @@
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/hr/departments/99"
+            "url": "{{base_url}}/api/leaves/my/1",
+            "description": "Karyawan membatalkan permohonan cuti miliknya jika statusnya masih Pending."
           }
         },
         {
-          "name": "Get Positions",
+          "name": "3.4 [HRD & Admin] Lihat Semua Permohonan Cuti Seluruh Karyawan",
           "request": {
             "method": "GET",
             "header": [
@@ -355,170 +348,12 @@
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/hr/positions"
+            "url": "{{base_url}}/api/leaves?status=Pending",
+            "description": "HRD atau Admin melihat daftar permohonan cuti yang perlu ditinjau (filter: ?status=Pending)."
           }
         },
         {
-          "name": "Create Position",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"department_id\": 2,\n  \"name\": \"AI Solutions Architect\"\n}"
-            },
-            "url": "{{base_url}}/api/hr/positions"
-          }
-        },
-        {
-          "name": "Delete Position",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/hr/positions/99"
-          }
-        }
-      ]
-    },
-    {
-      "name": "4. HRD - Karyawan",
-      "item": [
-        {
-          "name": "Get All Employees",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/hr/employees"
-          }
-        },
-        {
-          "name": "Get Employee By ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/hr/employees/1"
-          }
-        },
-        {
-          "name": "Create Employee",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"user_id\": 1,\n  \"employee_code\": \"EMP-TEST-01\",\n  \"full_name\": \"Karyawan Uji Coba\",\n  \"position_id\": 1,\n  \"manager_id\": null,\n  \"hire_date\": \"2026-01-01\",\n  \"phone\": \"081299998888\"\n}"
-            },
-            "url": "{{base_url}}/api/hr/employees"
-          }
-        },
-        {
-          "name": "Update Employee",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"full_name\": \"Rina Kartika Putri\",\n  \"position_id\": 8,\n  \"manager_id\": 4,\n  \"hire_date\": \"2024-03-01\",\n  \"phone\": \"081298765432\"\n}"
-            },
-            "url": "{{base_url}}/api/hr/employees/5"
-          }
-        },
-        {
-          "name": "Delete Employee",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/hr/employees/99"
-          }
-        }
-      ]
-    },
-    {
-      "name": "5. HRD - Absensi",
-      "item": [
-        {
-          "name": "Get Attendances",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/hr/attendances?page=1&limit=20"
-          }
-        },
-        {
-          "name": "Record Attendance (Manual)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"employee_id\": 5,\n  \"date\": \"2026-11-23\",\n  \"check_in\": \"08:30:00\",\n  \"check_out\": \"17:30:00\",\n  \"status\": \"Hadir\",\n  \"notes\": \"Presensi tercatat dari HRD\"\n}"
-            },
-            "url": "{{base_url}}/api/hr/attendances"
-          }
-        },
-        {
-          "name": "Update Attendance",
+          "name": "3.5 [HRD & Manager] SETUJUI (Approve) Permohonan Cuti",
           "request": {
             "method": "PATCH",
             "header": [
@@ -533,31 +368,85 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"Hadir\",\n  \"notes\": \"Koreksi jam check in\"\n}"
+              "raw": "{\n  \"status\": \"Approved\",\n  \"review_notes\": \"Permohonan cuti disetujui. Selamat berlibur!\"\n}"
             },
-            "url": "{{base_url}}/api/hr/attendances/1"
+            "url": "{{base_url}}/api/leaves/1/review",
+            "description": "HRD atau Manager menyetujui cuti karyawan (ganti angka 1 di URL dengan ID permohonan cuti)."
           }
         },
         {
-          "name": "Delete Attendance",
+          "name": "3.6 [HRD & Manager] TOLAK (Reject) Permohonan Cuti",
           "request": {
-            "method": "DELETE",
+            "method": "PATCH",
             "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/hr/attendances/99"
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Rejected\",\n  \"review_notes\": \"Mohon maaf permohonan belum dapat disetujui karena ada perilisan proyek penting pada tanggal tersebut.\"\n}"
+            },
+            "url": "{{base_url}}/api/leaves/1/review",
+            "description": "HRD atau Manager menolak cuti karyawan disertai catatan alasan penolakan."
           }
         }
       ]
     },
     {
-      "name": "6. Keuangan - Gaji",
+      "name": "4. Karyawan - Presensi / Absensi Harian & Profil Diri",
       "item": [
         {
-          "name": "Get All Salaries",
+          "name": "4.1 Presensi Masuk (Check-In Harian)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Hadir WFO kantor pusat tepat waktu\"\n}"
+            },
+            "url": "{{base_url}}/api/me/attendances/check-in",
+            "description": "Karyawan melakukan absensi masuk harian."
+          }
+        },
+        {
+          "name": "4.2 Presensi Pulang (Check-Out Harian)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Selesai menyelesaikan tugas harian\"\n}"
+            },
+            "url": "{{base_url}}/api/me/attendances/check-out",
+            "description": "Karyawan melakukan absensi pulang harian."
+          }
+        },
+        {
+          "name": "4.3 Lihat Riwayat Absensi Saya",
           "request": {
             "method": "GET",
             "header": [
@@ -566,11 +455,229 @@
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/finance/salaries"
+            "url": "{{base_url}}/api/me/attendances?page=1&limit=10",
+            "description": "Karyawan melihat daftar riwayat kehadirannya sendiri."
           }
         },
         {
-          "name": "Create Salary Slip",
+          "name": "4.4 Lihat Profil Saya Sendiri",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/me/profile",
+            "description": "Melihat informasi identitas, jabatan, departemen, dan nama atasan langsung."
+          }
+        },
+        {
+          "name": "4.5 Ubah Profil Saya Sendiri (Nama / Telepon)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Rina Kartika Sari\",\n  \"phone\": \"081299998888\"\n}"
+            },
+            "url": "{{base_url}}/api/me/profile",
+            "description": "Karyawan memperbarui nama lengkap atau nomor kontak pribadi."
+          }
+        },
+        {
+          "name": "4.6 Ganti Password Akun Saya Sendiri",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"password123\",\n  \"new_password\": \"passwordbaru123\"\n}"
+            },
+            "url": "{{base_url}}/api/me/password",
+            "description": "Karyawan mengganti password login akunnya sendiri secara aman."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. HRD - Master Departemen & Jabatan",
+      "item": [
+        {
+          "name": "5.1 Lihat Semua Departemen (11 Departemen)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/hr/departments",
+            "description": "Melihat daftar 11 departemen korporat."
+          }
+        },
+        {
+          "name": "5.2 Tambah Departemen Baru",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AI Research & Development\",\n  \"description\": \"Riset kecerdasan buatan\"\n}"
+            },
+            "url": "{{base_url}}/api/hr/departments",
+            "description": "HRD atau Admin menambahkan departemen baru."
+          }
+        },
+        {
+          "name": "5.3 Lihat Semua Jabatan (45+ Jabatan)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/hr/positions",
+            "description": "Melihat daftar seluruh jabatan di perusahaan."
+          }
+        },
+        {
+          "name": "5.4 Tambah Jabatan Baru ke Departemen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"department_id\": 2,\n  \"name\": \"AI Prompt Engineer\"\n}"
+            },
+            "url": "{{base_url}}/api/hr/positions",
+            "description": "HRD atau Admin menambahkan jabatan baru."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. HRD - Rekap Absensi Seluruh Karyawan",
+      "item": [
+        {
+          "name": "6.1 Lihat Rekap Absensi Seluruh Karyawan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/hr/attendances?page=1&limit=20",
+            "description": "HRD melihat rekapan kehadiran seluruh karyawan perusahaan."
+          }
+        },
+        {
+          "name": "6.2 Input Absensi Manual oleh HRD",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": 5,\n  \"date\": \"2026-11-23\",\n  \"check_in\": \"08:30:00\",\n  \"check_out\": \"17:30:00\",\n  \"status\": \"Hadir\",\n  \"notes\": \"Presensi manual tercatat oleh tim HRD\"\n}"
+            },
+            "url": "{{base_url}}/api/hr/attendances",
+            "description": "HRD menginputkan presensi karyawan jika karyawan lupa absen."
+          }
+        },
+        {
+          "name": "6.3 Koreksi Status Absensi oleh HRD",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Hadir\",\n  \"notes\": \"Koreksi setelah validasi surat tugas\"\n}"
+            },
+            "url": "{{base_url}}/api/hr/attendances/1",
+            "description": "HRD mengubah status absensi (misal dari Alpa menjadi Hadir)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Keuangan - Slip Gaji & Pencatatan Kas",
+      "item": [
+        {
+          "name": "7.1 Lihat Semua Slip Gaji Karyawan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/finance/salaries",
+            "description": "Melihat daftar slip gaji seluruh karyawan."
+          }
+        },
+        {
+          "name": "7.2 Terbitkan Slip Gaji Baru",
           "request": {
             "method": "POST",
             "header": [
@@ -587,11 +694,12 @@
               "mode": "raw",
               "raw": "{\n  \"employee_id\": 5,\n  \"month\": \"2026-12\",\n  \"base_salary\": 8500000,\n  \"allowance\": 1500000,\n  \"deduction\": 200000,\n  \"payment_status\": \"Pending\"\n}"
             },
-            "url": "{{base_url}}/api/finance/salaries"
+            "url": "{{base_url}}/api/finance/salaries",
+            "description": "Keuangan menerbitkan slip gaji bulanan karyawan."
           }
         },
         {
-          "name": "Update Salary (Bayar Slip Gaji)",
+          "name": "7.3 Bayar Gaji (Ubah Status Jadi Paid)",
           "request": {
             "method": "PATCH",
             "header": [
@@ -608,42 +716,12 @@
               "mode": "raw",
               "raw": "{\n  \"payment_status\": \"Paid\"\n}"
             },
-            "url": "{{base_url}}/api/finance/salaries/1"
+            "url": "{{base_url}}/api/finance/salaries/1",
+            "description": "Mengubah status slip gaji menjadi Paid setelah transfer berhasil."
           }
         },
         {
-          "name": "Delete Salary",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/finance/salaries/99"
-          }
-        }
-      ]
-    },
-    {
-      "name": "7. Keuangan - Transaksi & Laporan",
-      "item": [
-        {
-          "name": "Get Transactions",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/finance/transactions"
-          }
-        },
-        {
-          "name": "Create Transaction",
+          "name": "7.4 Catat Kas Masuk (Pemasukan)",
           "request": {
             "method": "POST",
             "header": [
@@ -658,70 +736,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"Pemasukan\",\n  \"category\": \"Project Enterprise API\",\n  \"amount\": 75000000,\n  \"description\": \"Pembayaran termin 1 proyek API manajemen\",\n  \"transaction_date\": \"2026-11-23\"\n}"
+              "raw": "{\n  \"type\": \"Pemasukan\",\n  \"category\": \"Project Client Enterprise\",\n  \"amount\": 85000000,\n  \"description\": \"Pelunasan kontrak pembuatan API backend\",\n  \"transaction_date\": \"2026-11-23\"\n}"
             },
-            "url": "{{base_url}}/api/finance/transactions"
+            "url": "{{base_url}}/api/finance/transactions",
+            "description": "Mencatat penerimaan uang kas perusahaan."
           }
         },
         {
-          "name": "Delete Transaction",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/finance/transactions/99"
-          }
-        },
-        {
-          "name": "Financial Summary Report",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/finance/reports"
-          }
-        }
-      ]
-    },
-    {
-      "name": "8. Manager - Tim & Kinerja",
-      "item": [
-        {
-          "name": "Get Subordinate Team",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/manager/team"
-          }
-        },
-        {
-          "name": "Get Performance Reports",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/manager/performance-reports"
-          }
-        },
-        {
-          "name": "Create Performance Review",
+          "name": "7.5 Catat Kas Keluar (Pengeluaran)",
           "request": {
             "method": "POST",
             "header": [
@@ -736,15 +758,49 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"employee_id\": 5,\n  \"period\": \"2026-Q4\",\n  \"tasks_completed\": 24,\n  \"kpi_score\": 94.5,\n  \"feedback\": \"Sangat baik dalam mendesain arsitektur Supabase REST API.\"\n}"
+              "raw": "{\n  \"type\": \"Pengeluaran\",\n  \"category\": \"Operasional Server\",\n  \"amount\": 5000000,\n  \"description\": \"Biaya langganan cloud hosting dan database\",\n  \"transaction_date\": \"2026-11-23\"\n}"
             },
-            "url": "{{base_url}}/api/manager/performance-reports"
+            "url": "{{base_url}}/api/finance/transactions",
+            "description": "Mencatat pengeluaran operasional perusahaan."
           }
         },
         {
-          "name": "Update Performance Review",
+          "name": "7.6 Laporan Ringkasan Kas & Saldo Bersih Perusahaan",
           "request": {
-            "method": "PATCH",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/finance/reports",
+            "description": "Kalkulasi otomatis total pemasukan, beban gaji, dan saldo kas bersih perusahaan."
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Manager - Tim Bawahan & Penilaian KPI",
+      "item": [
+        {
+          "name": "8.1 Lihat Anggota Tim Bawahan Saya",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/manager/team",
+            "description": "Manager melihat daftar karyawan yang menjadi bawahan langsungnya."
+          }
+        },
+        {
+          "name": "8.2 Buat Laporan Evaluasi Kinerja (KPI) Bawahan",
+          "request": {
+            "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
@@ -757,31 +813,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"kpi_score\": 96,\n  \"feedback\": \"Penyempurnaan performa query dan dokumentasi API sempurna.\"\n}"
+              "raw": "{\n  \"employee_id\": 5,\n  \"period\": \"2026-Q4\",\n  \"tasks_completed\": 25,\n  \"kpi_score\": 95.5,\n  \"feedback\": \"Sangat produktif dan berhasil menyelesaikan implementasi Supabase REST API tepat waktu.\"\n}"
             },
-            "url": "{{base_url}}/api/manager/performance-reports/1"
+            "url": "{{base_url}}/api/manager/performance-reports",
+            "description": "Manager membuat review dan nilai KPI untuk anggota tim bawahannya."
           }
         },
         {
-          "name": "Delete Performance Review",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/manager/performance-reports/99"
-          }
-        }
-      ]
-    },
-    {
-      "name": "9. Karyawan - Profil & Absensi Sendiri",
-      "item": [
-        {
-          "name": "Get My Profile",
+          "name": "8.3 Lihat Semua Laporan Kinerja Tim",
           "request": {
             "method": "GET",
             "header": [
@@ -790,11 +829,113 @@
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": "{{base_url}}/api/me/profile"
+            "url": "{{base_url}}/api/manager/performance-reports",
+            "description": "Manager melihat seluruh riwayat evaluasi kinerja bawahannya."
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Pengumuman Internal Perusahaan",
+      "item": [
+        {
+          "name": "9.1 Lihat Semua Pengumuman Kantor (Semua Karyawan)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/announcements",
+            "description": "Melihat surat edaran dan pengumuman kantor terbaru."
           }
         },
         {
-          "name": "Update My Profile",
+          "name": "9.2 Buat Pengumuman Baru (HRD & Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Jadwal Libur Akhir Tahun & Shift Operasional\",\n  \"content\": \"Diberitahukan kepada seluruh karyawan bahwa operasional kantor akan libur mulai tanggal 25 Desember hingga 1 Januari.\",\n  \"priority\": \"High\",\n  \"category\": \"Operasional\"\n}"
+            },
+            "url": "{{base_url}}/api/announcements",
+            "description": "HRD atau Admin mempublikasikan pengumuman baru untuk semua staf."
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Dashboard Eksekutif (Statistik Real-Time)",
+      "item": [
+        {
+          "name": "10.1 Lihat Ringkasan Real-Time Perusahaan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/dashboard/stats",
+            "description": "Ringkasan real-time: total karyawan, rasio absensi hari ini, kas operasional, dan cuti pending."
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Admin - Manajemen User & Hak Akses",
+      "item": [
+        {
+          "name": "11.1 Lihat Semua Akun Pengguna",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/users?page=1&limit=10",
+            "description": "Admin melihat daftar akun pengguna sistem."
+          }
+        },
+        {
+          "name": "11.2 Tambah Akun Pengguna Baru",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"staf_baru\",\n  \"email\": \"staf_baru@company.local\",\n  \"password\": \"password123\",\n  \"role_id\": 5,\n  \"is_active\": true\n}"
+            },
+            "url": "{{base_url}}/api/users",
+            "description": "Admin membuat akun login user baru."
+          }
+        },
+        {
+          "name": "11.3 Ubah Status Aktif / Role User",
           "request": {
             "method": "PUT",
             "header": [
@@ -809,288 +950,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"full_name\": \"Rina Kartika Sari\",\n  \"phone\": \"081234567890\"\n}"
+              "raw": "{\n  \"role_id\": 5,\n  \"is_active\": true\n}"
             },
-            "url": "{{base_url}}/api/me/profile"
-          }
-        },
-        {
-          "name": "Change My Password",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"old_password\": \"password123\",\n  \"new_password\": \"newpassword123\"\n}"
-            },
-            "url": "{{base_url}}/api/me/password"
-          }
-        },
-        {
-          "name": "Check-in Harian",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"notes\": \"Hadir WFO kantor pusat\"\n}"
-            },
-            "url": "{{base_url}}/api/me/attendances/check-in"
-          }
-        },
-        {
-          "name": "Check-out Harian",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"notes\": \"Selesai menyelesaikan fitur API hari ini\"\n}"
-            },
-            "url": "{{base_url}}/api/me/attendances/check-out"
-          }
-        },
-        {
-          "name": "Get My Attendances",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/me/attendances?page=1&limit=10"
-          }
-        }
-      ]
-    },
-    {
-      "name": "10. Dashboard Analytics",
-      "item": [
-        {
-          "name": "Get Real-time Executive Stats",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/dashboard/stats"
-          }
-        }
-      ]
-    },
-    {
-      "name": "11. Cuti & Izin (Leave Requests)",
-      "item": [
-        {
-          "name": "Ajukan Cuti/Izin (Karyawan)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"leave_type\": \"Cuti Tahunan\",\n  \"start_date\": \"2026-12-01\",\n  \"end_date\": \"2026-12-03\",\n  \"reason\": \"Acara keluarga tahunan di luar kota\"\n}"
-            },
-            "url": "{{base_url}}/api/leaves/apply"
-          }
-        },
-        {
-          "name": "Daftar Cuti/Izin Saya",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/leaves/my"
-          }
-        },
-        {
-          "name": "Batalkan Pengajuan Cuti Saya (Jika Pending)",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/leaves/my/1"
-          }
-        },
-        {
-          "name": "Daftar Seluruh Pengajuan Cuti (HRD & Admin)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/leaves?status=Pending"
-          }
-        },
-        {
-          "name": "Detail Pengajuan Cuti",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/leaves/1"
-          }
-        },
-        {
-          "name": "Review & Approval Cuti (HRD & Admin)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"Approved\",\n  \"review_notes\": \"Disetujui. Selamat berlibur!\"\n}"
-            },
-            "url": "{{base_url}}/api/leaves/1/review"
-          }
-        }
-      ]
-    },
-    {
-      "name": "12. Pengumuman Internal (Announcements)",
-      "item": [
-        {
-          "name": "Daftar Pengumuman (Publik Login)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/announcements?limit=10"
-          }
-        },
-        {
-          "name": "Detail Pengumuman",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/announcements/1"
-          }
-        },
-        {
-          "name": "Buat Pengumuman Baru (HRD & Admin)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Libur Nasional & Jam Operasional Akhir Tahun\",\n  \"content\": \"Diberitahukan kepada seluruh karyawan bahwa kantor akan libur operasional mulai tanggal 25 Desember hingga 1 Januari.\",\n  \"priority\": \"High\",\n  \"category\": \"Operasional\"\n}"
-            },
-            "url": "{{base_url}}/api/announcements"
-          }
-        },
-        {
-          "name": "Update Pengumuman",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Revisi: Libur Nasional & Jam Operasional Akhir Tahun\",\n  \"content\": \"Revisi: Untuk tim operasional on-call tetap standby sesuai jadwal shift masing-masing.\",\n  \"priority\": \"Urgent\",\n  \"category\": \"Operasional\"\n}"
-            },
-            "url": "{{base_url}}/api/announcements/1"
-          }
-        },
-        {
-          "name": "Hapus Pengumuman",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "{{base_url}}/api/announcements/99"
+            "url": "{{base_url}}/api/users/2",
+            "description": "Admin mengubah peran (role) atau menonaktifkan akun user."
           }
         }
       ]

@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { run, get, all, withTransaction } = require('../config/database');
 const { successResponse, errorResponse } = require('../utils/responseHelper');
 
@@ -290,6 +291,92 @@ const createEmployee = async (req, res, next) => {
   }
 };
 
+// Menerima karyawan baru: Buat Akun User + Buat Profil Karyawan SEKALIGUS (1 Langkah)
+const onboardEmployee = async (req, res, next) => {
+  try {
+    const {
+      username,
+      email,
+      password = 'password123',
+      role = 'Karyawan',
+      employee_code,
+      full_name,
+      position_id,
+      manager_id = null,
+      hire_date,
+      phone
+    } = req.body;
+
+    // 1. Cek duplikasi akun user
+    const existingUser = await get(
+      'SELECT id FROM users WHERE username = ? OR email = ?',
+      [username, email]
+    );
+    if (existingUser) {
+      return errorResponse(res, 409, 'Username atau email sudah digunakan oleh pengguna lain');
+    }
+
+    // 2. Cek duplikasi kode karyawan
+    const existingCode = await get(
+      'SELECT id FROM employees WHERE employee_code = ?',
+      [employee_code]
+    );
+    if (existingCode) {
+      return errorResponse(res, 409, 'Kode karyawan (employee_code) sudah digunakan');
+    }
+
+    // 3. Cek jabatan
+    const position = await get('SELECT id, name FROM positions WHERE id = ?', [position_id]);
+    if (!position) return errorResponse(res, 404, 'Jabatan (position_id) tidak ditemukan');
+
+    // 4. Cek role
+    const roleRow = await get('SELECT id, name FROM roles WHERE name = ?', [role]);
+    if (!roleRow) return errorResponse(res, 404, `Role '${role}' tidak ditemukan di sistem`);
+
+    // 5. Validasi atasan / manager jika diisi
+    const manager = await validateManager(manager_id);
+    if (!manager.valid) return errorResponse(res, 400, manager.message);
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const actualHireDate = hire_date || new Date().toISOString().split('T')[0];
+
+    // 6. Jalankan dalam 1 transaksi atomik
+    const result = await withTransaction(async (database) => {
+      const newUser = await database.run(
+        `INSERT INTO users (username, email, password_hash, role_id, is_active)
+         VALUES (?, ?, ?, ?, true)`,
+        [username, email, passwordHash, roleRow.id]
+      );
+
+      const newEmp = await database.run(
+        `INSERT INTO employees (user_id, employee_code, full_name, position_id, manager_id, hire_date, phone)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [newUser.id, employee_code, full_name, position_id, manager.managerId, actualHireDate, phone || null]
+      );
+
+      return { userId: newUser.id, employeeId: newEmp.id };
+    });
+
+    return successResponse(res, 201, 'Karyawan baru berhasil diterima! Akun dan profil langsung aktif siap login.', {
+      employee_id: result.employeeId,
+      user_id: result.userId,
+      employee_code,
+      full_name,
+      username,
+      email,
+      role: roleRow.name,
+      position: position.name,
+      hire_date: actualHireDate,
+      phone: phone || null
+    });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return errorResponse(res, 409, 'Data duplikat terdeteksi pada username, email, atau kode karyawan');
+    }
+    next(error);
+  }
+};
+
 const updateEmployee = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -478,6 +565,7 @@ module.exports = {
   getAllEmployees,
   getEmployeeById,
   createEmployee,
+  onboardEmployee,
   updateEmployee,
   deleteEmployee,
   getAllAttendances,

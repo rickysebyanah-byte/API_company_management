@@ -15,6 +15,7 @@ const {
   getAllEmployees,
   getEmployeeById,
   createEmployee,
+  onboardEmployee,
   updateEmployee,
   deleteEmployee,
   getAllAttendances,
@@ -92,6 +93,25 @@ router.get(
   validateRequest,
   getEmployeeById
 );
+// Terima Karyawan Baru Lengkap Sekaligus (Buat Akun Login + Profil Karyawan dalam 1 Request)
+router.post(
+  '/employees/onboard',
+  [
+    body('username').trim().isLength({ min: 3, max: 80 }).withMessage('Username minimal 3 karakter'),
+    body('email').trim().isEmail().withMessage('Format email tidak valid'),
+    body('password').optional().isLength({ min: 6 }).withMessage('Password minimal 6 karakter'),
+    body('role').optional().isIn(['Admin', 'HRD', 'Keuangan', 'Manager', 'Karyawan']).withMessage('Role tidak valid'),
+    body('employee_code').trim().notEmpty().withMessage('Kode karyawan (employee_code) wajib diisi'),
+    body('full_name').trim().notEmpty().withMessage('Nama lengkap (full_name) wajib diisi'),
+    body('position_id').isInt({ min: 1 }).withMessage('ID jabatan (position_id) wajib berupa angka positif').toInt(),
+    body('manager_id').optional({ nullable: true }).isInt({ min: 1 }).withMessage('ID manager harus berupa angka positif').toInt(),
+    body('hire_date').optional().isISO8601().withMessage('Tanggal bergabung harus format YYYY-MM-DD'),
+    body('phone').optional({ nullable: true }).isString()
+  ],
+  validateRequest,
+  onboardEmployee
+);
+
 router.post(
   '/employees',
   [
