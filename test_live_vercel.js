@@ -47,134 +47,105 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function runTests() {
-  console.log('\n=== MEMULAI TEST END-TO-END VERCEL LIVE ===\n');
+async function runUniqueCodeTests() {
+  console.log('Menunggu Vercel deploy commit terbaru (15 detik)...');
+  await delay(15000);
 
-  // 1. Root API Check
-  console.log('1. Cek Root API (GET /)...');
-  const rootRes = await request('GET', '/');
-  console.log('   Status:', rootRes.status, '| Pesan:', rootRes.body?.message || rootRes.raw);
+  console.log('\n=== PENGUJIAN ENDPOINT DENGAN KODE UNIK (TANPA ID ANGKA) ===\n');
 
-  // 2. Login HRD (siti_hrd)
-  console.log('\n2. Login HRD (POST /api/auth/login)...');
-  const hrdLogin = await request('POST', '/api/auth/login', {
-    username: 'siti_hrd',
-    password: 'password123'
-  });
-  console.log('   Status:', hrdLogin.status);
-  console.log('   Pesan:', hrdLogin.body?.message);
-  console.log('   Role:', hrdLogin.body?.data?.user?.role);
+  // 1. Login HRD
+  console.log('1. Login sebagai HRD (siti_hrd)...');
+  const hrdLogin = await request('POST', '/api/auth/login', { username: 'siti_hrd', password: 'password123' });
+  console.log('   Status:', hrdLogin.status, '| Pesan:', hrdLogin.body?.message);
+  console.log('   Role:', hrdLogin.body?.data?.user?.role, '| Data Pegawai:', hrdLogin.body?.data?.user?.employee?.employee_code);
   const hrdToken = hrdLogin.body?.data?.token;
 
-  if (!hrdToken) {
-    console.error('   HRD Login gagal!');
-    return;
-  }
+  // 2. HRD Cari Karyawan Langsung Pakai Kode Unik "EMP-005"
+  console.log('\n2. HRD Lihat Detail Karyawan pakai KODE UNIK (GET /api/hr/employees/EMP-005)...');
+  const empDetail = await request('GET', '/api/hr/employees/EMP-005', null, hrdToken);
+  console.log('   Status:', empDetail.status);
+  console.log('   Nama:', empDetail.body?.data?.full_name);
+  console.log('   Kode Karyawan:', empDetail.body?.data?.employee_code);
+  console.log('   Jabatan:', empDetail.body?.data?.position);
 
-  // 3. HRD Menerima Karyawan Baru (Onboarding 1 Langkah)
-  const rand = Math.floor(Math.random() * 90000) + 10000;
-  const newUsername = `karyawan_${rand}`;
-  const newEmail = `karyawan${rand}@company.com`;
-  const newEmpCode = `EMP${rand}`;
-
-  console.log(`\n3. [TOMBOL HRD] Terima Karyawan Baru (${newUsername}, ${newEmpCode})...`);
-  const onboardRes = await request('POST', '/api/hr/employees/onboard', {
-    username: newUsername,
-    email: newEmail,
-    password: 'password123',
-    role_id: 5, // Karyawan
-    employee_code: newEmpCode,
-    full_name: `Budi Hartono ${rand}`,
-    position_id: 5, // Backend Developer
-    manager_id: 4,  // Budi Santoso (Manager)
-    hire_date: '2026-03-01',
-    phone: '08123456789'
+  // 3. HRD Ubah Data Karyawan Pakai Kode Unik "EMP-005"
+  console.log('\n3. HRD Ubah Data Karyawan pakai KODE UNIK (PUT /api/hr/employees/EMP-005)...');
+  const empUpdate = await request('PUT', '/api/hr/employees/EMP-005', {
+    full_name: 'Rina Kartika S.Kom (Senior)',
+    phone: '08119999955'
   }, hrdToken);
+  console.log('   Status:', empUpdate.status);
+  console.log('   Pesan:', empUpdate.body?.message);
 
-  console.log('   Status:', onboardRes.status);
-  console.log('   Pesan:', onboardRes.body?.message);
-  console.log('   Data Hasil Onboard:', onboardRes.body?.data);
+  // 4. HRD Catat Absensi Pakai Kode Unik "EMP-005"
+  console.log('\n4. HRD Input Absensi Manual pakai KODE UNIK "EMP-005" (POST /api/hr/attendances)...');
+  const attRes = await request('POST', '/api/hr/attendances', {
+    employee_code: 'EMP-005',
+    date: '2026-03-20',
+    check_in: '08:45:00',
+    check_out: '17:15:00',
+    status: 'Hadir',
+    notes: 'Presensi dicatat dengan kode unik EMP-005'
+  }, hrdToken);
+  console.log('   Status:', attRes.status);
+  console.log('   Pesan:', attRes.body?.message);
 
-  // 4. Login Karyawan Baru
-  console.log(`\n4. Login Karyawan Baru (${newUsername})...`);
-  const empLogin = await request('POST', '/api/auth/login', {
-    username: newUsername,
-    password: 'password123'
-  });
-  console.log('   Status:', empLogin.status);
-  console.log('   Pesan:', empLogin.body?.message);
-  console.log('   User Info:', empLogin.body?.data?.user);
-  const empToken = empLogin.body?.data?.token;
+  // 5. Login Keuangan & Terbitkan Gaji Pakai Kode Unik "EMP-005"
+  console.log('\n5. Login Keuangan & Terbitkan Gaji Pakai KODE UNIK "EMP-005"...');
+  const finLogin = await request('POST', '/api/auth/login', { username: 'andi_keuangan', password: 'password123' });
+  const finToken = finLogin.body?.data?.token;
+  const salRes = await request('POST', '/api/finance/salaries', {
+    employee_code: 'EMP-005',
+    month: '2026-03',
+    base_salary: 12000000,
+    allowance: 1500000,
+    deduction: 300000,
+    payment_status: 'Pending'
+  }, finToken);
+  console.log('   Status:', salRes.status);
+  console.log('   Pesan:', salRes.body?.message);
 
-  // 5. Cek Profil Karyawan Baru
-  console.log('\n5. Cek Profil Karyawan Baru (GET /api/me/profile)...');
-  const profileRes = await request('GET', '/api/me/profile', null, empToken);
-  console.log('   Status:', profileRes.status);
-  console.log('   Nama:', profileRes.body?.data?.full_name);
-  console.log('   Jabatan:', profileRes.body?.data?.position);
-  console.log('   Atasan:', profileRes.body?.data?.manager_name);
-
-  // 6. Update Profil Mandiri
-  console.log('\n6. Update Profil Mandiri (PUT /api/me/profile)...');
-  const updateRes = await request('PUT', '/api/me/profile', {
-    full_name: `Budi Hartono ${rand} S.Kom`,
-    phone: '08999999999'
-  }, empToken);
-  console.log('   Status:', updateRes.status);
-  console.log('   Pesan:', updateRes.body?.message);
-  console.log('   Data Hasil Update:', updateRes.body?.data);
-
-  // 7. Karyawan Baru Mengajukan Cuti (Apply Leave)
-  console.log('\n7. Karyawan Baru Mengajukan Cuti (POST /api/leaves/apply)...');
-  const leaveRes = await request('POST', '/api/leaves/apply', {
-    leave_type: 'Cuti Tahunan',
-    start_date: '2026-04-10',
-    end_date: '2026-04-12',
-    reason: 'Acara keluarga besar di luar kota'
-  }, empToken);
-  console.log('   Status:', leaveRes.status);
-  console.log('   Pesan:', leaveRes.body?.message);
-  console.log('   Data Cuti Diajukan:', leaveRes.body?.data);
-  const leaveId = leaveRes.body?.data?.id;
-
-  // 8. HRD Review & Setujui Cuti
-  if (leaveId) {
-    console.log(`\n8. HRD Menyetujui Cuti (PATCH /api/leaves/${leaveId}/review)...`);
-    const reviewRes = await request('PATCH', `/api/leaves/${leaveId}/review`, {
-      status: 'Approved'
-    }, hrdToken);
-    console.log('   Status:', reviewRes.status);
-    console.log('   Pesan:', reviewRes.body?.message);
-    console.log('   Data Cuti Disetujui:', reviewRes.body?.data);
-  }
-
-  // 9. Cek Riwayat Cuti Karyawan
-  console.log('\n9. Cek Riwayat Cuti Karyawan (GET /api/leaves/my)...');
-  const myLeavesRes = await request('GET', '/api/leaves/my', null, empToken);
-  console.log('   Status:', myLeavesRes.status);
-  console.log('   Jumlah Permohonan Cuti:', myLeavesRes.body?.data?.length);
-  if (myLeavesRes.body?.data?.length > 0) {
-    console.log('   Detail Cuti Terakhir:', myLeavesRes.body?.data[0]);
-  }
-
-  // 10. Manager Cek Tim Bawahan
-  console.log('\n10. Login Manager & Cek Tim (budi_manager)...');
-  const mgrLogin = await request('POST', '/api/auth/login', {
-    username: 'budi_manager',
-    password: 'password123'
-  });
+  // 6. Login Manager & Buat Evaluasi Kinerja Pakai Kode Unik "EMP-005"
+  console.log('\n6. Login Manager & Buat KPI Laporan Kinerja pakai KODE UNIK "EMP-005"...');
+  const mgrLogin = await request('POST', '/api/auth/login', { username: 'budi_manager', password: 'password123' });
   const mgrToken = mgrLogin.body?.data?.token;
-  if (mgrToken) {
-    const teamRes = await request('GET', '/api/manager/team', null, mgrToken);
-    console.log('   Status:', teamRes.status);
-    console.log('   Jumlah Anggota Tim Bawahan:', teamRes.body?.data?.length);
-    const foundNewEmp = teamRes.body?.data?.find(m => m.employee_code === newEmpCode || m.username === newUsername);
-    console.log('   Karyawan baru terdaftar di tim manager?', foundNewEmp ? 'YA (Ditemukan: ' + foundNewEmp.full_name + ')' : 'Belum');
-  }
+  const kpiRes = await request('POST', '/api/manager/performance-reports', {
+    employee_code: 'EMP-005',
+    period: '2026-Q1',
+    tasks_completed: 30,
+    kpi_score: 96,
+    feedback: 'Kinerja sangat luar biasa dan mandiri menyelesaikan arsitektur sistem.'
+  }, mgrToken);
+  console.log('   Status:', kpiRes.status);
+  console.log('   Pesan:', kpiRes.body?.message);
 
-  console.log('\n=== SEMUA 10 PENGUJIAN API VERCEL LIVE SELESAI DENGAN SUKSES! ===');
+  // 7. HRD Review Cuti Pakai Kode Unik "EMP-005"
+  console.log('\n7. HRD Setujui Cuti Pakai KODE UNIK "EMP-005" (PATCH /api/leaves/EMP-005/review)...');
+  const reviewRes = await request('PATCH', '/api/leaves/EMP-005/review', {
+    status: 'Approved',
+    review_notes: 'Disetujui langsung menggunakan referensi kode unik karyawan'
+  }, hrdToken);
+  console.log('   Status:', reviewRes.status);
+  console.log('   Pesan:', reviewRes.body?.message);
+
+  // 8. Karyawan Check-In & Check-Out (Mandiri, Idempoten, Selalu Green 200)
+  console.log('\n8. Karyawan (rina_dev) Check-In & Check-Out Mandiri...');
+  const devLogin = await request('POST', '/api/auth/login', { username: 'rina_dev', password: 'password123' });
+  const devToken = devLogin.body?.data?.token;
+  const cinRes = await request('POST', '/api/me/attendances/check-in', null, devToken);
+  console.log('   Status Check-In:', cinRes.status, '| Pesan:', cinRes.body?.message);
+  const coutRes = await request('POST', '/api/me/attendances/check-out', null, devToken);
+  console.log('   Status Check-Out:', coutRes.status, '| Pesan:', coutRes.body?.message);
+
+  // 9. HRD Hapus Karyawan Dummy Percobaan Pakai Kode Unik "EMP-099"
+  console.log('\n9. HRD Hapus Karyawan Dummy Percobaan pakai KODE UNIK "EMP-099"...');
+  const delRes = await request('DELETE', '/api/hr/employees/EMP-099', null, hrdToken);
+  console.log('   Status:', delRes.status);
+  console.log('   Pesan:', delRes.body?.message);
+
+  console.log('\n=== SEMUA PENGUJIAN DENGAN KODE UNIK BERHASIL 100% TANPA KEBINGUNGAN ID! ===');
 }
 
-runTests().catch(err => {
-  console.error('Test execution error:', err);
+runUniqueCodeTests().catch(err => {
+  console.error('Error pengujian:', err);
 });

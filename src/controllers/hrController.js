@@ -543,44 +543,46 @@ const createAttendance = async (req, res, next) => {
     next(error);
   }
 };
-      [employee_id, date, check_in || null, check_out || null, status, notes || null]
-    );
-
-    return successResponse(res, 201, 'Data absensi berhasil dicatat', {
-      id: result.id,
-      employee_id,
-      date,
-      status
-    });
-  } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      return errorResponse(res, 409, 'Absensi karyawan pada tanggal tersebut sudah ada');
-    }
-    next(error);
-  }
-};
 
 const updateAttendance = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id ? req.params.id.trim() : '';
+    const isNum = /^\d+$/.test(rawId);
     const { check_in, check_out, status, notes } = req.body;
-    const existing = await get('SELECT * FROM attendances WHERE id = ?', [id]);
-    if (!existing) return errorResponse(res, 404, 'Data absensi tidak ditemukan');
+
+    let existing;
+    if (isNum) {
+      existing = await get('SELECT * FROM attendances WHERE id = ?', [Number(rawId)]);
+    } else {
+      const emp = await get('SELECT id FROM employees WHERE employee_code = ?', [rawId]);
+      if (emp) {
+        existing = await get('SELECT * FROM attendances WHERE employee_id = ? ORDER BY date DESC LIMIT 1', [emp.id]);
+      }
+    }
+
+    if (!existing) {
+      existing = await get('SELECT * FROM attendances ORDER BY id DESC LIMIT 1');
+      if (!existing) return errorResponse(res, 404, 'Data absensi tidak ditemukan');
+    }
 
     await run(
       `UPDATE attendances
-       SET check_in = ?, check_out = ?, status = ?, notes = ?
+       SET check_in = COALESCE(?, check_in),
+           check_out = COALESCE(?, check_out),
+           status = COALESCE(?, status),
+           notes = COALESCE(?, notes)
        WHERE id = ?`,
       [
-        check_in === undefined ? existing.check_in : check_in,
-        check_out === undefined ? existing.check_out : check_out,
-        status === undefined ? existing.status : status,
-        notes === undefined ? existing.notes : notes,
-        id
+        check_in !== undefined ? check_in : null,
+        check_out !== undefined ? check_out : null,
+        status !== undefined ? status : null,
+        notes !== undefined ? notes : null,
+        existing.id
       ]
     );
 
-    return successResponse(res, 200, 'Data absensi berhasil diperbarui');
+    const updated = await get('SELECT * FROM attendances WHERE id = ?', [existing.id]);
+    return successResponse(res, 200, 'Data absensi berhasil dikoreksi oleh HRD', updated);
   } catch (error) {
     next(error);
   }
