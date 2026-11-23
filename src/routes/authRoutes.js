@@ -8,13 +8,15 @@ const router = express.Router();
 router.post(
   '/login',
   [
-    body('username')
-      .custom((value, { req }) => {
-        const username = typeof value === 'string' ? value.trim() : '';
-        const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
-        return Boolean(username || email);
-      })
-      .withMessage('Username atau email wajib diisi'),
+    body().custom((value, { req }) => {
+      const username = typeof req.body?.username === 'string' ? req.body.username.trim() : '';
+      const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+      const identifier = typeof req.body?.identifier === 'string' ? req.body.identifier.trim() : '';
+      if (!username && !email && !identifier) {
+        throw new Error('Username atau email wajib diisi');
+      }
+      return true;
+    }),
     body('password')
       .isString()
       .withMessage('Password wajib diisi')

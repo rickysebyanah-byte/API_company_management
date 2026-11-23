@@ -7,9 +7,10 @@ require('dotenv').config();
 const login = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
+    const identifierParam = typeof req.body?.identifier === 'string' ? req.body.identifier.trim() : '';
     const usernameIdentifier = typeof username === 'string' ? username.trim() : '';
     const emailIdentifier = typeof email === 'string' ? email.trim() : '';
-    const identifier = usernameIdentifier || emailIdentifier;
+    const identifier = usernameIdentifier || emailIdentifier || identifierParam;
 
     const user = await get(
       `SELECT u.id, u.username, u.email, u.password_hash, u.is_active, r.name AS role,
