@@ -413,7 +413,7 @@ const onboardEmployee = async (req, res, next) => {
         role: roleRow.name,
         employee_id: result.employeeId
       },
-      process.env.JWT_SECRET || 'fallback_secret_company_management',
+      process.env.JWT_SECRET || 'super_secret_jwt_key_2026_enterprise_company_api',
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 

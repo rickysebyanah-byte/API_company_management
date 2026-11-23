@@ -2,7 +2,7 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const secret = process.env.JWT_SECRET || 'rahasia_super_aman_perusahaan_2026_ganti_di_produksi';
+const secret = 'super_secret_jwt_key_2026_enterprise_company_api';
 
 // 1. Generate 365-day tokens for all 5 roles
 const adminToken = jwt.sign({ id: 1, username: 'admin', role: 'Admin', employee_id: 1 }, secret, { expiresIn: '365d' });

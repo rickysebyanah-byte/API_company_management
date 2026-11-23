@@ -12,32 +12,32 @@
     },
     {
       "key": "hrd_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQzMTMzLCJleHAiOjE4MjY5NzkxMzN9.kpfzLPsbzSXJrcySLkB6xvdwDyFCl7QOYIAPWf40Fig",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQzOTQ4LCJleHAiOjE4MjY5Nzk5NDh9.lEDG-ol7XR6Nq1rWkiMjjFivIbAxtuF_8HBZ8n_vB5Y",
       "type": "string"
     },
     {
       "key": "admin_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImVtcGxveWVlX2lkIjoxLCJpYXQiOjE3OTU0NDMxMzMsImV4cCI6MTgyNjk3OTEzM30.2Gc90bR16dYO5VxjHl3f0_gNLxKJ1rFuew9MibroaQA",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImVtcGxveWVlX2lkIjoxLCJpYXQiOjE3OTU0NDM5NDgsImV4cCI6MTgyNjk3OTk0OH0.mg3OSGzrKRLEN01T0UFmNh9m_sJQx9i8B6dXLc_KfgQ",
       "type": "string"
     },
     {
       "key": "keuangan_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhbmRpX2tldWFuZ2FuIiwicm9sZSI6IktldWFuZ2FuIiwiZW1wbG95ZWVfaWQiOjMsImlhdCI6MTc5NTQ0MzEzMywiZXhwIjoxODI2OTc5MTMzfQ.NhWjtvkZraB_SM4f8EZgvJVJjz84xLFPJ24-xLq97DA",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhbmRpX2tldWFuZ2FuIiwicm9sZSI6IktldWFuZ2FuIiwiZW1wbG95ZWVfaWQiOjMsImlhdCI6MTc5NTQ0Mzk0OCwiZXhwIjoxODI2OTc5OTQ4fQ.S-r-zp52M5P4PFpdsPpCEgiEXCTxxKQBFDd_Zhczahw",
       "type": "string"
     },
     {
       "key": "manager_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJidWRpX21hbmFnZXIiLCJyb2xlIjoiTWFuYWdlciIsImVtcGxveWVlX2lkIjo0LCJpYXQiOjE3OTU0NDMxMzMsImV4cCI6MTgyNjk3OTEzM30.4PUzmifXQeEheTPdF8s_iOxBE6t6QOlNMhtLdRT73L8",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJidWRpX21hbmFnZXIiLCJyb2xlIjoiTWFuYWdlciIsImVtcGxveWVlX2lkIjo0LCJpYXQiOjE3OTU0NDM5NDgsImV4cCI6MTgyNjk3OTk0OH0.IF2rRYc59uQ3rjrZWoBRR3CfS30XrJqCg8wmc4Kyf94",
       "type": "string"
     },
     {
       "key": "karyawan_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJyaW5hX2RldiIsInJvbGUiOiJLYXJ5YXdhbiIsImVtcGxveWVlX2lkIjo1LCJpYXQiOjE3OTU0NDMxMzMsImV4cCI6MTgyNjk3OTEzM30.TweeNR_OgQYDh2Rk0uzznn7QC2ZV1DsNDaUqSLe8fMI",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJyaW5hX2RldiIsInJvbGUiOiJLYXJ5YXdhbiIsImVtcGxveWVlX2lkIjo1LCJpYXQiOjE3OTU0NDM5NDgsImV4cCI6MTgyNjk3OTk0OH0.S1XwM5lkEiIRvVwThvBgFOpV4XkDaMr2T8TxC3VDojQ",
       "type": "string"
     },
     {
       "key": "token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQzMTMzLCJleHAiOjE4MjY5NzkxMzN9.kpfzLPsbzSXJrcySLkB6xvdwDyFCl7QOYIAPWf40Fig",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQzOTQ4LCJleHAiOjE4MjY5Nzk5NDh9.lEDG-ol7XR6Nq1rWkiMjjFivIbAxtuF_8HBZ8n_vB5Y",
       "type": "string"
     },
     {
