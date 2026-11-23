@@ -9,9 +9,9 @@ types.setTypeParser(1700, (val) => (val === null ? null : parseFloat(val)));
 // Tipe BIGINT / INT8 (seperti hasil COUNT) dikembalikan sebagai integer number
 types.setTypeParser(20, (val) => (val === null ? null : parseInt(val, 10)));
 
-// Konfigurasi Pool PostgreSQL / Supabase
-const defaultDatabaseUrl = 'postgresql://postgres:kijiosia123@db.ppricjddcaulleumngva.supabase.co:5432/postgres';
-const connectionString = (process.env.DATABASE_URL && process.env.DATABASE_URL.trim())
+// Konfigurasi Pool PostgreSQL / Supabase (IPv4 Compatible Pooler)
+const defaultDatabaseUrl = 'postgresql://postgres.ppricjddcaulleumngva:kijiosia123@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres';
+const connectionString = (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() && !process.env.DATABASE_URL.includes('[YOUR-DATABASE-PASSWORD]'))
   || (process.env.SUPABASE_DATABASE_URL && process.env.SUPABASE_DATABASE_URL.trim())
   || defaultDatabaseUrl;
 
