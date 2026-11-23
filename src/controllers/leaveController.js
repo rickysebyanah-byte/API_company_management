@@ -14,6 +14,10 @@ const applyLeave = async (req, res, next) => {
 
     const { leave_type, start_date, end_date, reason } = req.body;
 
+    let normalizedLeaveType = leave_type;
+    if (leave_type === 'Tahunan') normalizedLeaveType = 'Cuti Tahunan';
+    if (leave_type === 'Izin') normalizedLeaveType = 'Izin Penting';
+
     if (start_date > end_date) {
       return errorResponse(res, 400, 'Tanggal akhir tidak boleh mendahului tanggal mulai.');
     }
@@ -21,7 +25,7 @@ const applyLeave = async (req, res, next) => {
     const result = await run(
       `INSERT INTO leave_requests (employee_id, leave_type, start_date, end_date, reason, status)
        VALUES (?, ?, ?, ?, ?, 'Pending')`,
-      [req.user.employee_id, leave_type, start_date, end_date, reason]
+      [req.user.employee_id, normalizedLeaveType, start_date, end_date, reason]
     );
 
     const leave = await get('SELECT * FROM leave_requests WHERE id = ?', [result.id]);

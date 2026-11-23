@@ -7,7 +7,7 @@ const getTeamMembers = async (req, res, next) => {
     let query = `
       SELECT e.id, e.employee_code, e.full_name, e.position_id,
              p.name AS position, d.id AS department_id, d.name AS department,
-             e.hire_date, e.phone, e.manager_id, u.email
+             e.hire_date, e.phone, e.manager_id, u.username, u.email
       FROM employees e
       JOIN users u ON e.user_id = u.id
       JOIN positions p ON e.position_id = p.id

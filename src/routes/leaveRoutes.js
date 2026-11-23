@@ -20,7 +20,9 @@ router.use(authenticate);
 router.post(
   '/apply',
   [
-    body('leave_type').isIn(['Cuti Tahunan', 'Sakit', 'Izin Penting', 'Melahirkan', 'Lainnya']).withMessage('Tipe cuti tidak valid'),
+    body('leave_type')
+      .isIn(['Cuti Tahunan', 'Tahunan', 'Sakit', 'Izin', 'Izin Penting', 'Melahirkan', 'Lainnya'])
+      .withMessage('Tipe cuti tidak valid. Pilihan: Cuti Tahunan, Sakit, Izin Penting, Melahirkan, Lainnya'),
     body('start_date').isISO8601({ strict: true }).withMessage('Format start_date harus YYYY-MM-DD'),
     body('end_date').isISO8601({ strict: true }).withMessage('Format end_date harus YYYY-MM-DD'),
     body('reason').trim().notEmpty().withMessage('Alasan cuti/izin wajib diisi')
