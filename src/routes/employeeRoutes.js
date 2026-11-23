@@ -21,7 +21,10 @@ router.get('/profile', getMyProfile);
 
 router.put(
   '/profile',
-  [body('phone').optional({ nullable: true }).isString().withMessage('Nomor telepon harus berupa teks')],
+  [
+    body('full_name').optional().trim().notEmpty().withMessage('Nama lengkap tidak boleh kosong'),
+    body('phone').optional({ nullable: true }).isString().withMessage('Nomor telepon harus berupa teks')
+  ],
   validateRequest,
   updateMyProfile
 );

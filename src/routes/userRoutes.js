@@ -27,7 +27,12 @@ router.post(
     body('username').trim().isLength({ min: 3, max: 80 }).withMessage('Username harus 3–80 karakter'),
     body('email').isEmail().isLength({ max: 255 }).withMessage('Format email tidak valid atau terlalu panjang'),
     body('password').isLength({ min: 6 }).withMessage('Password minimal 6 karakter'),
-    body('role_id').isInt({ min: 1 }).withMessage('Role ID harus berupa angka positif').toInt()
+    body('role_id').isInt({ min: 1 }).withMessage('Role ID harus berupa angka positif').toInt(),
+    body('full_name').optional().trim().notEmpty(),
+    body('employee_code').optional().trim().notEmpty(),
+    body('position_id').optional().isInt({ min: 1 }).toInt(),
+    body('manager_id').optional({ nullable: true }).isInt({ min: 1 }).toInt(),
+    body('phone').optional({ nullable: true }).isString()
   ],
   validateRequest,
   createUser

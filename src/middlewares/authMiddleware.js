@@ -24,7 +24,8 @@ const authenticate = async (req, res, next) => {
 
     // Verifikasi apakah user masih ada & aktif di database
     const user = await get(
-      `SELECT u.id, u.username, u.email, u.is_active, r.name AS role, e.id AS employee_id
+      `SELECT u.id, u.username, u.email, u.is_active, r.name AS role,
+              e.id AS employee_id, e.employee_code, e.full_name, e.manager_id, e.position_id
        FROM users u
        JOIN roles r ON u.role_id = r.id
        LEFT JOIN employees e ON e.user_id = u.id

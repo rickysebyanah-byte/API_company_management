@@ -171,13 +171,25 @@ const checkOut = async (req, res, next) => {
 
 const updateMyProfile = async (req, res, next) => {
   try {
-    const { phone } = req.body;
+    const { full_name, phone } = req.body;
     if (!req.user.employee_id) {
       return errorResponse(res, 404, 'Data kepegawaian Anda belum terdaftar.');
     }
 
-    await run('UPDATE employees SET phone = ? WHERE id = ?', [phone || null, req.user.employee_id]);
-    return successResponse(res, 200, 'Profil berhasil diperbarui');
+    const current = await get('SELECT full_name, phone FROM employees WHERE id = ?', [req.user.employee_id]);
+    const updatedName = full_name !== undefined && full_name.trim() !== '' ? full_name.trim() : current.full_name;
+    const updatedPhone = phone !== undefined ? phone.trim() : current.phone;
+
+    await run(
+      'UPDATE employees SET full_name = ?, phone = ? WHERE id = ?',
+      [updatedName, updatedPhone, req.user.employee_id]
+    );
+
+    return successResponse(res, 200, 'Profil berhasil diperbarui', {
+      employee_id: req.user.employee_id,
+      full_name: updatedName,
+      phone: updatedPhone
+    });
   } catch (error) {
     next(error);
   }

@@ -43,9 +43,20 @@ const getUserById = async (req, res, next) => {
 
 const createUser = async (req, res, next) => {
   try {
-    const { username, email, password, role_id } = req.body;
+    const {
+      username,
+      email,
+      password,
+      role_id,
+      full_name,
+      employee_code,
+      position_id,
+      manager_id = null,
+      hire_date,
+      phone
+    } = req.body;
 
-    const roleExists = await get(`SELECT id FROM roles WHERE id = ?`, [role_id]);
+    const roleExists = await get(`SELECT id, name FROM roles WHERE id = ?`, [role_id]);
     if (!roleExists) return errorResponse(res, 400, 'Role ID tidak valid');
 
     const duplicate = await get(`SELECT id FROM users WHERE username = ? OR email = ?`, [username, email]);
@@ -57,15 +68,36 @@ const createUser = async (req, res, next) => {
       [username, email, passwordHash, role_id]
     );
 
+    let employeeInfo = null;
+    if (full_name && employee_code && position_id) {
+      const position = await get('SELECT id, name FROM positions WHERE id = ?', [position_id]);
+      if (position) {
+        const actualHireDate = hire_date || new Date().toISOString().split('T')[0];
+        const empRes = await run(
+          `INSERT INTO employees (user_id, employee_code, full_name, position_id, manager_id, hire_date, phone)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [result.id, employee_code, full_name, position_id, manager_id || null, actualHireDate, phone || null]
+        );
+        employeeInfo = {
+          employee_id: empRes.id,
+          employee_code,
+          full_name,
+          position: position.name
+        };
+      }
+    }
+
     return successResponse(res, 201, 'Pengguna berhasil ditambahkan', {
       id: result.id,
       username,
       email,
-      role_id
+      role: roleExists.name,
+      role_id,
+      employee: employeeInfo
     });
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
-      return errorResponse(res, 409, 'Username atau email sudah terdaftar');
+      return errorResponse(res, 409, 'Username, email, atau kode karyawan sudah terdaftar');
     }
     next(error);
   }

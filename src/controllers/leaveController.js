@@ -5,7 +5,11 @@ const { successResponse, errorResponse } = require('../utils/responseHelper');
 const applyLeave = async (req, res, next) => {
   try {
     if (!req.user.employee_id) {
-      return errorResponse(res, 404, 'Profil karyawan Anda belum terdaftar. Hubungi HRD.');
+      return errorResponse(
+        res,
+        404,
+        'Akun Anda belum memiliki profil karyawan. Silakan minta HRD untuk mendaftarkan profil Anda melalui menu HRD (Terima Karyawan Baru).'
+      );
     }
 
     const { leave_type, start_date, end_date, reason } = req.body;
@@ -146,7 +150,8 @@ const reviewLeave = async (req, res, next) => {
     );
 
     const updated = await get('SELECT * FROM leave_requests WHERE id = ?', [id]);
-    return successResponse(res, 200, `Permohonan cuti berhasil di-${status.toLowerCase()}`, updated);
+    const statusIndo = status === 'Approved' ? 'disetujui (Approved)' : 'ditolak (Rejected)';
+    return successResponse(res, 200, `Permohonan cuti berhasil ${statusIndo}`, updated);
   } catch (error) {
     next(error);
   }
