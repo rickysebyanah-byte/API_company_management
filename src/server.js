@@ -12,7 +12,7 @@ async function startServer() {
 
   await initDatabase();
   const server = await new Promise((resolve, reject) => {
-    const httpServer = app.listen(PORT, () => resolve(httpServer));
+    const httpServer = app.listen(PORT, '0.0.0.0', () => resolve(httpServer));
     httpServer.once('error', reject);
   });
 
