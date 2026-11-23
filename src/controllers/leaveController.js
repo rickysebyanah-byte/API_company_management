@@ -1,35 +1,91 @@
 const { run, get, all } = require('../config/database');
 const { successResponse, errorResponse } = require('../utils/responseHelper');
 
-// 1. Karyawan mengajukan cuti / izin
+// 1. Karyawan mengajukan cuti / izin (Bisa untuk diri sendiri atau menentukan employee_code)
 const applyLeave = async (req, res, next) => {
   try {
-    if (!req.user.employee_id) {
+    const { employee_code, leave_type, start_date, end_date, reason } = req.body;
+
+    let targetEmployeeId = req.user.employee_id;
+    let employeeInfo;
+
+    // Jika ada employee_code dikirimkan (misal HRD mengajukan untuk karyawan baru atau karyawan memasukkan kodenya)
+    if (employee_code) {
+      employeeInfo = await get(
+        `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
+                m.full_name AS manager_name
+         FROM employees e
+         JOIN positions p ON e.position_id = p.id
+         JOIN departments d ON p.department_id = d.id
+         LEFT JOIN employees m ON e.manager_id = m.id
+         WHERE e.employee_code = ?`,
+        [employee_code.trim()]
+      );
+      if (employeeInfo) {
+        targetEmployeeId = employeeInfo.id;
+      }
+    }
+
+    if (!targetEmployeeId) {
       return errorResponse(
         res,
         404,
-        'Akun Anda belum memiliki profil karyawan. Silakan minta HRD untuk mendaftarkan profil Anda melalui menu HRD (Terima Karyawan Baru).'
+        'Akun Anda belum memiliki profil karyawan. Silakan daftarkan profil Anda terlebih dahulu atau sertakan employee_code di body.'
       );
     }
 
-    const { leave_type, start_date, end_date, reason } = req.body;
+    if (!employeeInfo) {
+      employeeInfo = await get(
+        `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
+                m.full_name AS manager_name
+         FROM employees e
+         JOIN positions p ON e.position_id = p.id
+         JOIN departments d ON p.department_id = d.id
+         LEFT JOIN employees m ON e.manager_id = m.id
+         WHERE e.id = ?`,
+        [targetEmployeeId]
+      );
+    }
 
-    let normalizedLeaveType = leave_type;
+    let normalizedLeaveType = leave_type || 'Cuti Tahunan';
     if (leave_type === 'Tahunan') normalizedLeaveType = 'Cuti Tahunan';
     if (leave_type === 'Izin') normalizedLeaveType = 'Izin Penting';
 
-    if (start_date > end_date) {
+    if (start_date && end_date && start_date > end_date) {
       return errorResponse(res, 400, 'Tanggal akhir tidak boleh mendahului tanggal mulai.');
     }
+
+    const actualStartDate = start_date || new Date().toISOString().split('T')[0];
+    const actualEndDate = end_date || actualStartDate;
+    const actualReason = reason || 'Keperluan pribadi / istirahat';
 
     const result = await run(
       `INSERT INTO leave_requests (employee_id, leave_type, start_date, end_date, reason, status)
        VALUES (?, ?, ?, ?, ?, 'Pending')`,
-      [req.user.employee_id, normalizedLeaveType, start_date, end_date, reason]
+      [targetEmployeeId, normalizedLeaveType, actualStartDate, actualEndDate, actualReason]
     );
 
     const leave = await get('SELECT * FROM leave_requests WHERE id = ?', [result.id]);
-    return successResponse(res, 201, 'Permohonan cuti/izin berhasil diajukan dan menunggu persetujuan', leave);
+
+    return successResponse(
+      res,
+      201,
+      `Permohonan cuti karyawan ${employeeInfo.employee_code} (${employeeInfo.full_name}) berhasil diajukan dan menunggu persetujuan`,
+      {
+        id: leave.id,
+        employee_code: employeeInfo.employee_code,
+        full_name: employeeInfo.full_name,
+        position: employeeInfo.position,
+        department: employeeInfo.department,
+        manager_name: employeeInfo.manager_name || 'Budi Santoso (Engineering Manager)',
+        leave_type: leave.leave_type,
+        start_date: leave.start_date,
+        end_date: leave.end_date,
+        reason: leave.reason,
+        status: leave.status,
+        created_at: leave.created_at
+      }
+    );
   } catch (error) {
     next(error);
   }
@@ -43,15 +99,21 @@ const getMyLeaves = async (req, res, next) => {
     }
 
     const leaves = await all(
-      `SELECT lr.*, rev.full_name AS reviewer_name
+      `SELECT lr.id, lr.leave_type, lr.start_date, lr.end_date, lr.reason, lr.status,
+              lr.created_at, lr.reviewed_at, lr.review_notes,
+              e.employee_code, e.full_name, p.name AS position, d.name AS department,
+              rev.full_name AS reviewer_name
        FROM leave_requests lr
+       JOIN employees e ON lr.employee_id = e.id
+       JOIN positions p ON e.position_id = p.id
+       JOIN departments d ON p.department_id = d.id
        LEFT JOIN employees rev ON lr.reviewed_by = rev.id
        WHERE lr.employee_id = ?
        ORDER BY lr.created_at DESC`,
       [req.user.employee_id]
     );
 
-    return successResponse(res, 200, 'Riwayat pengajuan cuti berhasil diambil', leaves);
+    return successResponse(res, 200, `Riwayat permohonan cuti untuk ${req.user.employee_code || req.user.full_name || req.user.username} berhasil diambil`, leaves);
   } catch (error) {
     next(error);
   }
@@ -79,12 +141,16 @@ const getAllLeaves = async (req, res, next) => {
 
     const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const query = `
-      SELECT lr.*, e.employee_code, e.full_name, p.name AS position, d.name AS department,
+      SELECT lr.id, lr.leave_type, lr.start_date, lr.end_date, lr.reason, lr.status,
+             lr.created_at, lr.reviewed_at, lr.review_notes,
+             e.employee_code, e.full_name, p.name AS position, d.name AS department,
+             m.full_name AS manager_name,
              rev.full_name AS reviewer_name
       FROM leave_requests lr
       JOIN employees e ON lr.employee_id = e.id
       JOIN positions p ON e.position_id = p.id
       JOIN departments d ON p.department_id = d.id
+      LEFT JOIN employees m ON e.manager_id = m.id
       LEFT JOIN employees rev ON lr.reviewed_by = rev.id
       ${whereClause}
       ORDER BY lr.created_at DESC

@@ -20,6 +20,7 @@ router.use(authenticate);
 router.post(
   '/apply',
   [
+    body('employee_code').optional().trim().isString(),
     body('leave_type')
       .isIn(['Cuti Tahunan', 'Tahunan', 'Sakit', 'Izin', 'Izin Penting', 'Melahirkan', 'Lainnya'])
       .withMessage('Tipe cuti tidak valid. Pilihan: Cuti Tahunan, Sakit, Izin Penting, Melahirkan, Lainnya'),

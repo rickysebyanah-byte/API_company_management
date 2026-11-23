@@ -7,11 +7,33 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "https://api-company-management.vercel.app"
+      "value": "https://api-company-management.vercel.app",
+      "type": "string"
     },
     {
       "key": "token",
-      "value": ""
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hrd_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "karyawan_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employee_code",
+      "value": "EMP-005",
+      "type": "string"
+    },
+    {
+      "key": "leave_id",
+      "value": "1",
+      "type": "string"
     }
   ],
   "item": [
@@ -25,10 +47,13 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.token) {",
-                  "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token berhasil disimpan secara otomatis:', jsonData.data.token.substring(0, 25) + '...');",
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data && json.data.token) {",
+                  "        pm.environment.set('token', json.data.token);",
+                  "        pm.environment.set('hrd_token', json.data.token);",
+                  "        pm.environment.set('role', 'HRD');",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -216,8 +241,35 @@
               "raw": "{\n  \"username\": \"karyawan_budi_{{$randomInt}}\",\n  \"email\": \"budi_{{$randomInt}}@company.com\",\n  \"password\": \"password123\",\n  \"role\": \"Karyawan\",\n  \"employee_code\": \"EMP-{{$randomInt}}\",\n  \"full_name\": \"Budi Hartono S.Kom\",\n  \"position_id\": 5,\n  \"manager_code\": \"EMP-004\",\n  \"hire_date\": \"2026-03-01\",\n  \"phone\": \"08123456789\"\n}"
             },
             "url": "{{base_url}}/api/hr/employees/onboard",
-            "description": "Tombol HRD untuk menerima karyawan baru. Menggunakan kode unik 'employee_code' dan 'manager_code'. Sekali klik langsung membuat akun login dan profil aktif."
-          }
+            "description": "HRD menerima karyawan baru. Begitu request ini sukses (201 Created), token dan kode unik karyawan baru OTOMATIS disimpan ke Postman environment. Anda bisa langsung membuka folder 3 (Ajukan Cuti) dan request cuti akan otomatis atas nama karyawan baru ini!"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data) {",
+                  "        if (json.data.token) {",
+                  "            // Otomatis aktifkan token karyawan baru untuk request berikutnya (seperti ajukan cuti)",
+                  "            pm.environment.set('token', json.data.token);",
+                  "            pm.environment.set('karyawan_token', json.data.token);",
+                  "        }",
+                  "        if (json.data.employee_code) {",
+                  "            pm.environment.set('employee_code', json.data.employee_code);",
+                  "            pm.environment.set('karyawan_baru_code', json.data.employee_code);",
+                  "        }",
+                  "        if (json.data.full_name) {",
+                  "            pm.environment.set('karyawan_nama', json.data.full_name);",
+                  "        }",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "2.2 Lihat Semua Karyawan Lengkap",
@@ -304,11 +356,27 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"leave_type\": \"Cuti Tahunan\",\n  \"start_date\": \"2026-12-15\",\n  \"end_date\": \"2026-12-17\",\n  \"reason\": \"Acara keluarga dan liburan akhir tahun\"\n}"
+              "raw": "{\n  \"employee_code\": \"{{employee_code}}\",\n  \"leave_type\": \"Cuti Tahunan\",\n  \"start_date\": \"2026-05-10\",\n  \"end_date\": \"2026-05-12\",\n  \"reason\": \"Liburan keluarga dan istirahat\"\n}"
             },
             "url": "{{base_url}}/api/leaves/apply",
-            "description": "Karyawan mengajukan cuti. Pilihan leave_type: 'Cuti Tahunan', 'Sakit', 'Izin Penting', 'Melahirkan', 'Lainnya'."
-          }
+            "description": "Mengajukan permohonan cuti untuk karyawan baru (menggunakan token & kode unik '{{employee_code}}'). Cuti otomatis terhubung dengan atasan (Manager Budi Santoso) dan berstatus 'Pending'. ID cuti otomatis tersimpan ke variabel {{leave_id}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data && json.data.id) {",
+                  "        pm.environment.set('leave_id', json.data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "3.2 [Karyawan] Lihat Riwayat Pengajuan Cuti Saya",
@@ -353,7 +421,7 @@
           }
         },
         {
-          "name": "3.5 [HRD & Manager] SETUJUI (Approve) Permohonan Cuti",
+          "name": "3.5 [HRD & Manager] SETUJUI (Approve) Permohonan Cuti Karyawan Baru",
           "request": {
             "method": "PATCH",
             "header": [
@@ -363,15 +431,15 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"Approved\",\n  \"review_notes\": \"Permohonan cuti disetujui. Selamat berlibur!\"\n}"
+              "raw": "{\n  \"status\": \"Approved\",\n  \"review_notes\": \"Permohonan cuti karyawan baru telah disetujui. Selamat berlibur!\"\n}"
             },
-            "url": "{{base_url}}/api/leaves/1/review",
-            "description": "HRD atau Manager menyetujui cuti karyawan (ganti angka 1 di URL dengan ID permohonan cuti)."
+            "url": "{{base_url}}/api/leaves/{{leave_id}}/review",
+            "description": "HRD / Atasan menyetujui (Approve) cuti karyawan baru. Menggunakan token HRD ({{hrd_token}}) yang otomatis tersimpan saat login HRD."
           }
         },
         {
@@ -385,14 +453,14 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{hrd_token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"Rejected\",\n  \"review_notes\": \"Mohon atur ulang jadwal cuti karena ada meeting penting.\"\n}"
+              "raw": "{\n  \"status\": \"Rejected\",\n  \"review_notes\": \"Mohon reschedule karena bertepatan dengan deadline proyek.\"\n}"
             },
-            "url": "{{base_url}}/api/leaves/2/review",
+            "url": "{{base_url}}/api/leaves/{{leave_id}}/review",
             "description": "HRD atau Manager menolak cuti karyawan disertai catatan alasan penolakan."
           }
         }

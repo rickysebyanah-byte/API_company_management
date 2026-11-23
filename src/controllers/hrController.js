@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { run, get, all, withTransaction } = require('../config/database');
 const { successResponse, errorResponse } = require('../utils/responseHelper');
 
@@ -321,7 +322,9 @@ const onboardEmployee = async (req, res, next) => {
       employee_code,
       full_name,
       position_id,
+      position_name,
       manager_id = null,
+      manager_code,
       hire_date,
       phone
     } = req.body;
@@ -344,17 +347,43 @@ const onboardEmployee = async (req, res, next) => {
       return errorResponse(res, 409, 'Kode karyawan (employee_code) sudah digunakan');
     }
 
-    // 3. Cek jabatan
-    const position = await get('SELECT id, name FROM positions WHERE id = ?', [position_id]);
-    if (!position) return errorResponse(res, 404, 'Jabatan (position_id) tidak ditemukan');
+    // 3. Cek jabatan (bisa pakai position_id atau position_name)
+    let targetPosId = position_id;
+    if (!targetPosId && position_name) {
+      const pos = await get('SELECT id, name FROM positions WHERE name ILIKE ? LIMIT 1', [`%${position_name.trim()}%`]);
+      if (pos) targetPosId = pos.id;
+    }
+    if (!targetPosId) targetPosId = 5; // Default: Backend Developer
+
+    const position = await get('SELECT id, name, department_id FROM positions WHERE id = ?', [targetPosId]);
+    if (!position) return errorResponse(res, 404, 'Jabatan tidak ditemukan');
+
+    const department = await get('SELECT id, name FROM departments WHERE id = ?', [position.department_id]);
 
     // 4. Cek role
     const roleRow = await get('SELECT id, name FROM roles WHERE name = ?', [role]);
     if (!roleRow) return errorResponse(res, 404, `Role '${role}' tidak ditemukan di sistem`);
 
-    // 5. Validasi atasan / manager jika diisi
-    const manager = await validateManager(manager_id);
+    // 5. Validasi atasan / manager (bisa pakai manager_id, manager_code, atau otomatis atasan default)
+    let targetMgrId = manager_id;
+    if (!targetMgrId && manager_code) {
+      const mgr = await get('SELECT id FROM employees WHERE employee_code = ?', [manager_code.trim()]);
+      if (mgr) targetMgrId = mgr.id;
+    }
+    if (!targetMgrId) {
+      const defMgr = await get(
+        `SELECT e.id FROM employees e
+         JOIN users u ON e.user_id = u.id
+         JOIN roles r ON u.role_id = r.id
+         WHERE r.name = 'Manager' LIMIT 1`
+      );
+      if (defMgr) targetMgrId = defMgr.id;
+    }
+
+    const manager = await validateManager(targetMgrId);
     if (!manager.valid) return errorResponse(res, 400, manager.message);
+
+    const managerEmp = manager.managerId ? await get('SELECT full_name, employee_code FROM employees WHERE id = ?', [manager.managerId]) : null;
 
     const passwordHash = await bcrypt.hash(password, 10);
     const actualHireDate = hire_date || new Date().toISOString().split('T')[0];
@@ -370,26 +399,46 @@ const onboardEmployee = async (req, res, next) => {
       const newEmp = await database.run(
         `INSERT INTO employees (user_id, employee_code, full_name, position_id, manager_id, hire_date, phone)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [newUser.id, employee_code, full_name, position_id, manager.managerId, actualHireDate, phone || null]
+        [newUser.id, employee_code, full_name, targetPosId, manager.managerId, actualHireDate, phone || null]
       );
 
       return { userId: newUser.id, employeeId: newEmp.id };
     });
 
-    return successResponse(res, 201, 'Karyawan baru berhasil diterima! Akun dan profil langsung aktif siap login.', {
-      employee_id: result.employeeId,
-      user_id: result.userId,
-      employee_code,
-      full_name,
-      username,
-      email,
-      role: roleRow.name,
-      position: position.name,
-      hire_date: actualHireDate,
-      phone: phone || null
-    });
+    // 7. Buat token JWT untuk karyawan baru agar bisa langsung dipakai
+    const token = jwt.sign(
+      {
+        id: result.userId,
+        username,
+        role: roleRow.name,
+        employee_id: result.employeeId
+      },
+      process.env.JWT_SECRET || 'fallback_secret_company_management',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+
+    return successResponse(
+      res,
+      201,
+      `Karyawan baru ${employee_code} (${full_name}) berhasil diterima dan otomatis terhubung dengan Manager ${managerEmp ? managerEmp.full_name : 'Budi Santoso'}.`,
+      {
+        token, // Token otomatis karyawan baru, langsung siap pakai untuk ajukan cuti!
+        employee_id: result.employeeId,
+        user_id: result.userId,
+        employee_code,
+        full_name,
+        username,
+        email,
+        role: roleRow.name,
+        position: position.name,
+        department: department ? department.name : 'Technology',
+        manager_name: managerEmp ? `${managerEmp.full_name} (${managerEmp.employee_code})` : 'Budi Santoso (EMP-004)',
+        hire_date: actualHireDate,
+        phone: phone || null
+      }
+    );
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === 'ER_DUP_ENTRY' || error.code === '23505') {
       return errorResponse(res, 409, 'Data duplikat terdeteksi pada username, email, atau kode karyawan');
     }
     next(error);
