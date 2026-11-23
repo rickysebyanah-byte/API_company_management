@@ -12,37 +12,42 @@
     },
     {
       "key": "hrd_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQzOTQ4LCJleHAiOjE4MjY5Nzk5NDh9.lEDG-ol7XR6Nq1rWkiMjjFivIbAxtuF_8HBZ8n_vB5Y",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQ3NDkyLCJleHAiOjE4MjY5ODM0OTJ9.58JJMQi4DCQm9tapZ4_zFTPtJhmLQELGz0C8n4vEUz8",
       "type": "string"
     },
     {
       "key": "admin_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImVtcGxveWVlX2lkIjoxLCJpYXQiOjE3OTU0NDM5NDgsImV4cCI6MTgyNjk3OTk0OH0.mg3OSGzrKRLEN01T0UFmNh9m_sJQx9i8B6dXLc_KfgQ",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImVtcGxveWVlX2lkIjoxLCJpYXQiOjE3OTU0NDc0OTIsImV4cCI6MTgyNjk4MzQ5Mn0.B4Fx_j-C0PH3ALoIE5mhE8htv0333Bvoy4Gu3sbMToA",
       "type": "string"
     },
     {
       "key": "keuangan_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhbmRpX2tldWFuZ2FuIiwicm9sZSI6IktldWFuZ2FuIiwiZW1wbG95ZWVfaWQiOjMsImlhdCI6MTc5NTQ0Mzk0OCwiZXhwIjoxODI2OTc5OTQ4fQ.S-r-zp52M5P4PFpdsPpCEgiEXCTxxKQBFDd_Zhczahw",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhbmRpX2tldWFuZ2FuIiwicm9sZSI6IktldWFuZ2FuIiwiZW1wbG95ZWVfaWQiOjMsImlhdCI6MTc5NTQ0NzQ5MiwiZXhwIjoxODI2OTgzNDkyfQ.jefgssuh7IfvcVDhE1mGVMwFecimcC4KbgEd-jej0fg",
       "type": "string"
     },
     {
       "key": "manager_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJidWRpX21hbmFnZXIiLCJyb2xlIjoiTWFuYWdlciIsImVtcGxveWVlX2lkIjo0LCJpYXQiOjE3OTU0NDM5NDgsImV4cCI6MTgyNjk3OTk0OH0.IF2rRYc59uQ3rjrZWoBRR3CfS30XrJqCg8wmc4Kyf94",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJidWRpX21hbmFnZXIiLCJyb2xlIjoiTWFuYWdlciIsImVtcGxveWVlX2lkIjo0LCJpYXQiOjE3OTU0NDc0OTIsImV4cCI6MTgyNjk4MzQ5Mn0.D4RZ4LDBkc7ViXzn84KudcN6PjDtQiAhq9qAMqTAzAE",
       "type": "string"
     },
     {
       "key": "karyawan_token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJyaW5hX2RldiIsInJvbGUiOiJLYXJ5YXdhbiIsImVtcGxveWVlX2lkIjo1LCJpYXQiOjE3OTU0NDM5NDgsImV4cCI6MTgyNjk3OTk0OH0.S1XwM5lkEiIRvVwThvBgFOpV4XkDaMr2T8TxC3VDojQ",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJyaW5hX2RldiIsInJvbGUiOiJLYXJ5YXdhbiIsImVtcGxveWVlX2lkIjo1LCJpYXQiOjE3OTU0NDc0OTIsImV4cCI6MTgyNjk4MzQ5Mn0.hv1pbQqt6Hhv_ZiLwrcNX05oXVcx5yu_MYkdwXRBqZ0",
       "type": "string"
     },
     {
       "key": "token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQzOTQ4LCJleHAiOjE4MjY5Nzk5NDh9.lEDG-ol7XR6Nq1rWkiMjjFivIbAxtuF_8HBZ8n_vB5Y",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzaXRpX2hyZCIsInJvbGUiOiJIUkQiLCJlbXBsb3llZV9pZCI6MiwiaWF0IjoxNzk1NDQ3NDkyLCJleHAiOjE4MjY5ODM0OTJ9.58JJMQi4DCQm9tapZ4_zFTPtJhmLQELGz0C8n4vEUz8",
       "type": "string"
     },
     {
       "key": "employee_code",
       "value": "EMP-005",
+      "type": "string"
+    },
+    {
+      "key": "employee_name",
+      "value": "Rina Kartika S.Kom (Senior)",
       "type": "string"
     },
     {
@@ -65,6 +70,8 @@
                   "if (pm.response.code === 200) {",
                   "    var json = pm.response.json();",
                   "    if (json.data && json.data.token) {",
+                  "        pm.collectionVariables.set('hrd_token', json.data.token);",
+                  "        pm.collectionVariables.set('token', json.data.token);",
                   "        pm.environment.set('hrd_token', json.data.token);",
                   "        pm.environment.set('token', json.data.token);",
                   "    }",
@@ -100,6 +107,8 @@
                   "if (pm.response.code === 200) {",
                   "    var json = pm.response.json();",
                   "    if (json.data && json.data.token) {",
+                  "        pm.collectionVariables.set('admin_token', json.data.token);",
+                  "        pm.collectionVariables.set('token', json.data.token);",
                   "        pm.environment.set('admin_token', json.data.token);",
                   "        pm.environment.set('token', json.data.token);",
                   "    }",
@@ -135,6 +144,8 @@
                   "if (pm.response.code === 200) {",
                   "    var json = pm.response.json();",
                   "    if (json.data && json.data.token) {",
+                  "        pm.collectionVariables.set('manager_token', json.data.token);",
+                  "        pm.collectionVariables.set('token', json.data.token);",
                   "        pm.environment.set('manager_token', json.data.token);",
                   "        pm.environment.set('token', json.data.token);",
                   "    }",
@@ -170,6 +181,8 @@
                   "if (pm.response.code === 200) {",
                   "    var json = pm.response.json();",
                   "    if (json.data && json.data.token) {",
+                  "        pm.collectionVariables.set('keuangan_token', json.data.token);",
+                  "        pm.collectionVariables.set('token', json.data.token);",
                   "        pm.environment.set('keuangan_token', json.data.token);",
                   "        pm.environment.set('token', json.data.token);",
                   "    }",
@@ -205,8 +218,16 @@
                   "if (pm.response.code === 200) {",
                   "    var json = pm.response.json();",
                   "    if (json.data && json.data.token) {",
+                  "        pm.collectionVariables.set('karyawan_token', json.data.token);",
+                  "        pm.collectionVariables.set('token', json.data.token);",
                   "        pm.environment.set('karyawan_token', json.data.token);",
                   "        pm.environment.set('token', json.data.token);",
+                  "        if (json.data.user && json.data.user.employee) {",
+                  "            pm.collectionVariables.set('employee_code', json.data.user.employee.employee_code);",
+                  "            pm.collectionVariables.set('employee_name', json.data.user.employee.full_name);",
+                  "            pm.environment.set('employee_code', json.data.user.employee.employee_code);",
+                  "            pm.environment.set('employee_name', json.data.user.employee.full_name);",
+                  "        }",
                   "    }",
                   "}"
                 ],
@@ -274,14 +295,22 @@
                   "    var json = pm.response.json();",
                   "    if (json.data) {",
                   "        if (json.data.token) {",
-                  "            // Simpan token karyawan baru ke variabel karyawan_token & karyawan_baru_token",
-                  "            // JANGAN pernah merusak atau menimpa hrd_token!",
+                  "            pm.collectionVariables.set('karyawan_token', json.data.token);",
+                  "            pm.collectionVariables.set('karyawan_baru_token', json.data.token);",
                   "            pm.environment.set('karyawan_token', json.data.token);",
                   "            pm.environment.set('karyawan_baru_token', json.data.token);",
                   "        }",
                   "        if (json.data.employee_code) {",
+                  "            pm.collectionVariables.set('employee_code', json.data.employee_code);",
+                  "            pm.collectionVariables.set('karyawan_baru_code', json.data.employee_code);",
                   "            pm.environment.set('employee_code', json.data.employee_code);",
                   "            pm.environment.set('karyawan_baru_code', json.data.employee_code);",
+                  "        }",
+                  "        if (json.data.full_name) {",
+                  "            pm.collectionVariables.set('employee_name', json.data.full_name);",
+                  "            pm.collectionVariables.set('karyawan_baru_nama', json.data.full_name);",
+                  "            pm.environment.set('employee_name', json.data.full_name);",
+                  "            pm.environment.set('karyawan_baru_nama', json.data.full_name);",
                   "        }",
                   "    }",
                   "}"
@@ -376,7 +405,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"employee_code\": \"{{employee_code}}\",\n  \"leave_type\": \"Cuti Tahunan\",\n  \"start_date\": \"2026-05-10\",\n  \"end_date\": \"2026-05-12\",\n  \"reason\": \"Liburan keluarga dan istirahat\"\n}"
+              "raw": "{\n  \"employee_code\": \"{{employee_code}}\",\n  \"full_name\": \"{{employee_name}}\",\n  \"leave_type\": \"Cuti Tahunan\",\n  \"start_date\": \"2026-05-10\",\n  \"end_date\": \"2026-05-12\",\n  \"reason\": \"Liburan keluarga dan istirahat\"\n}"
             },
             "url": "{{base_url}}/api/leaves/apply",
             "description": "Mengajukan permohonan cuti untuk karyawan baru (menggunakan token & kode unik '{{employee_code}}'). Cuti otomatis terhubung dengan atasan (Manager Budi Santoso) dan berstatus 'Pending'. ID cuti otomatis tersimpan ke variabel {{leave_id}}."
@@ -389,6 +418,7 @@
                   "if (pm.response.code === 201) {",
                   "    var json = pm.response.json();",
                   "    if (json.data && json.data.id) {",
+                  "        pm.collectionVariables.set('leave_id', json.data.id);",
                   "        pm.environment.set('leave_id', json.data.id);",
                   "    }",
                   "}"

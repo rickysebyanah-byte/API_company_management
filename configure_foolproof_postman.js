@@ -23,6 +23,7 @@ coll.variable = [
   { key: "karyawan_token", value: karyawanToken, type: "string" },
   { key: "token", value: hrdToken, type: "string" },
   { key: "employee_code", value: "EMP-005", type: "string" },
+  { key: "employee_name", value: "Rina Kartika S.Kom (Senior)", type: "string" },
   { key: "leave_id", value: "1", type: "string" }
 ];
 
@@ -42,7 +43,6 @@ for (const folder of coll.item) {
   const fName = folder.name;
 
   if (fName.includes('1. Login')) {
-    // Di login folder, tiap login menyimpan token khusus masing-masing
     for (const item of folder.item) {
       if (item.name.includes('1.1 Login sebagai HRD')) {
         item.event = [{
@@ -52,6 +52,8 @@ for (const folder of coll.item) {
               "if (pm.response.code === 200) {",
               "    var json = pm.response.json();",
               "    if (json.data && json.data.token) {",
+              "        pm.collectionVariables.set('hrd_token', json.data.token);",
+              "        pm.collectionVariables.set('token', json.data.token);",
               "        pm.environment.set('hrd_token', json.data.token);",
               "        pm.environment.set('token', json.data.token);",
               "    }",
@@ -68,6 +70,8 @@ for (const folder of coll.item) {
               "if (pm.response.code === 200) {",
               "    var json = pm.response.json();",
               "    if (json.data && json.data.token) {",
+              "        pm.collectionVariables.set('admin_token', json.data.token);",
+              "        pm.collectionVariables.set('token', json.data.token);",
               "        pm.environment.set('admin_token', json.data.token);",
               "        pm.environment.set('token', json.data.token);",
               "    }",
@@ -84,6 +88,8 @@ for (const folder of coll.item) {
               "if (pm.response.code === 200) {",
               "    var json = pm.response.json();",
               "    if (json.data && json.data.token) {",
+              "        pm.collectionVariables.set('manager_token', json.data.token);",
+              "        pm.collectionVariables.set('token', json.data.token);",
               "        pm.environment.set('manager_token', json.data.token);",
               "        pm.environment.set('token', json.data.token);",
               "    }",
@@ -100,6 +106,8 @@ for (const folder of coll.item) {
               "if (pm.response.code === 200) {",
               "    var json = pm.response.json();",
               "    if (json.data && json.data.token) {",
+              "        pm.collectionVariables.set('keuangan_token', json.data.token);",
+              "        pm.collectionVariables.set('token', json.data.token);",
               "        pm.environment.set('keuangan_token', json.data.token);",
               "        pm.environment.set('token', json.data.token);",
               "    }",
@@ -116,8 +124,16 @@ for (const folder of coll.item) {
               "if (pm.response.code === 200) {",
               "    var json = pm.response.json();",
               "    if (json.data && json.data.token) {",
+              "        pm.collectionVariables.set('karyawan_token', json.data.token);",
+              "        pm.collectionVariables.set('token', json.data.token);",
               "        pm.environment.set('karyawan_token', json.data.token);",
               "        pm.environment.set('token', json.data.token);",
+              "        if (json.data.user && json.data.user.employee) {",
+              "            pm.collectionVariables.set('employee_code', json.data.user.employee.employee_code);",
+              "            pm.collectionVariables.set('employee_name', json.data.user.employee.full_name);",
+              "            pm.environment.set('employee_code', json.data.user.employee.employee_code);",
+              "            pm.environment.set('employee_name', json.data.user.employee.full_name);",
+              "        }",
               "    }",
               "}"
             ],
@@ -127,7 +143,6 @@ for (const folder of coll.item) {
       }
     }
   } else if (fName.includes('2. HRD') || fName.includes('5. HRD') || fName.includes('6. HRD')) {
-    // Semua request di folder HRD SELALU memakai {{hrd_token}}! Tidak akan pernah tertukar dengan role Karyawan!
     for (const item of folder.item) {
       setAuthHeader(item, 'hrd_token');
     }
@@ -142,14 +157,22 @@ for (const folder of coll.item) {
             "    var json = pm.response.json();",
             "    if (json.data) {",
             "        if (json.data.token) {",
-            "            // Simpan token karyawan baru ke variabel karyawan_token & karyawan_baru_token",
-            "            // JANGAN pernah merusak atau menimpa hrd_token!",
+            "            pm.collectionVariables.set('karyawan_token', json.data.token);",
+            "            pm.collectionVariables.set('karyawan_baru_token', json.data.token);",
             "            pm.environment.set('karyawan_token', json.data.token);",
             "            pm.environment.set('karyawan_baru_token', json.data.token);",
             "        }",
             "        if (json.data.employee_code) {",
+            "            pm.collectionVariables.set('employee_code', json.data.employee_code);",
+            "            pm.collectionVariables.set('karyawan_baru_code', json.data.employee_code);",
             "            pm.environment.set('employee_code', json.data.employee_code);",
             "            pm.environment.set('karyawan_baru_code', json.data.employee_code);",
+            "        }",
+            "        if (json.data.full_name) {",
+            "            pm.collectionVariables.set('employee_name', json.data.full_name);",
+            "            pm.collectionVariables.set('karyawan_baru_nama', json.data.full_name);",
+            "            pm.environment.set('employee_name', json.data.full_name);",
+            "            pm.environment.set('karyawan_baru_nama', json.data.full_name);",
             "        }",
             "    }",
             "}"
@@ -164,6 +187,33 @@ for (const folder of coll.item) {
         setAuthHeader(item, 'karyawan_token');
       } else {
         setAuthHeader(item, 'hrd_token');
+      }
+
+      if (item.name.includes('3.1 [Karyawan] Ajukan')) {
+        item.request.body.raw = JSON.stringify({
+          employee_code: "{{employee_code}}",
+          full_name: "{{employee_name}}",
+          leave_type: "Cuti Tahunan",
+          start_date: "2026-05-10",
+          end_date: "2026-05-12",
+          reason: "Liburan keluarga dan istirahat"
+        }, null, 2);
+
+        item.event = [{
+          listen: "test",
+          script: {
+            exec: [
+              "if (pm.response.code === 201) {",
+              "    var json = pm.response.json();",
+              "    if (json.data && json.data.id) {",
+              "        pm.collectionVariables.set('leave_id', json.data.id);",
+              "        pm.environment.set('leave_id', json.data.id);",
+              "    }",
+              "}"
+            ],
+            type: "text/javascript"
+          }
+        }];
       }
     }
   } else if (fName.includes('4. Karyawan')) {
@@ -190,4 +240,4 @@ for (const folder of coll.item) {
 }
 
 fs.writeFileSync('postman_collection.json', JSON.stringify(coll, null, 2), 'utf8');
-console.log('Postman collection berhasil dibuat 100% bebas bentrok role!');
+console.log('Postman collection berhasil dibuat 100% bebas bentrok role & nama!');

@@ -1,16 +1,33 @@
 const { run, get, all } = require('../config/database');
 const { successResponse, errorResponse } = require('../utils/responseHelper');
 
-// 1. Karyawan mengajukan cuti / izin (Bisa untuk diri sendiri atau menentukan employee_code)
+// Helper cek string template Postman yang belum ter-resolve (misal "{{employee_code}}")
+const isTemplate = (val) => typeof val === 'string' && val.trim().startsWith('{{') && val.trim().endsWith('}}');
+
+// 1. Karyawan mengajukan cuti / izin (Bisa untuk diri sendiri, atau menentukan employee_code, atau full_name)
 const applyLeave = async (req, res, next) => {
   try {
-    const { employee_code, leave_type, start_date, end_date, reason } = req.body;
+    const {
+      employee_code,
+      full_name,
+      employee_name,
+      nama,
+      leave_type,
+      start_date,
+      end_date,
+      reason
+    } = req.body;
 
     let targetEmployeeId = req.user.employee_id;
     let employeeInfo;
 
-    // Jika ada employee_code dikirimkan (misal HRD mengajukan untuk karyawan baru atau karyawan memasukkan kodenya)
-    if (employee_code) {
+    const requestedCode = (!isTemplate(employee_code) && employee_code) ? String(employee_code).trim() : null;
+    const requestedName = (!isTemplate(full_name) && full_name) ||
+                          (!isTemplate(employee_name) && employee_name) ||
+                          (!isTemplate(nama) && nama) ? String(full_name || employee_name || nama).trim() : null;
+
+    // 1. Cek berdasarkan employee_code jika dikirimkan
+    if (requestedCode) {
       employeeInfo = await get(
         `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
                 m.full_name AS manager_name
@@ -19,22 +36,33 @@ const applyLeave = async (req, res, next) => {
          JOIN departments d ON p.department_id = d.id
          LEFT JOIN employees m ON e.manager_id = m.id
          WHERE e.employee_code = ?`,
-        [employee_code.trim()]
+        [requestedCode]
       );
       if (employeeInfo) {
         targetEmployeeId = employeeInfo.id;
       }
     }
 
-    if (!targetEmployeeId) {
-      return errorResponse(
-        res,
-        404,
-        'Akun Anda belum memiliki profil karyawan. Silakan daftarkan profil Anda terlebih dahulu atau sertakan employee_code di body.'
+    // 2. Jika belum ditemukan tapi ada nama yang dikirimkan, cari berdasarkan nama
+    if (!employeeInfo && requestedName) {
+      employeeInfo = await get(
+        `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
+                m.full_name AS manager_name
+         FROM employees e
+         JOIN positions p ON e.position_id = p.id
+         JOIN departments d ON p.department_id = d.id
+         LEFT JOIN employees m ON e.manager_id = m.id
+         WHERE e.full_name ILIKE ? OR e.full_name ILIKE ?
+         ORDER BY e.id DESC LIMIT 1`,
+        [requestedName, `%${requestedName}%`]
       );
+      if (employeeInfo) {
+        targetEmployeeId = employeeInfo.id;
+      }
     }
 
-    if (!employeeInfo) {
+    // 3. Jika belum ditemukan, gunakan profil dari token pengguna yang sedang login
+    if (!employeeInfo && targetEmployeeId) {
       employeeInfo = await get(
         `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
                 m.full_name AS manager_name
@@ -44,6 +72,14 @@ const applyLeave = async (req, res, next) => {
          LEFT JOIN employees m ON e.manager_id = m.id
          WHERE e.id = ?`,
         [targetEmployeeId]
+      );
+    }
+
+    if (!employeeInfo) {
+      return errorResponse(
+        res,
+        404,
+        'Akun Anda belum memiliki profil karyawan. Silakan daftarkan profil Anda terlebih dahulu atau sertakan employee_code / nama di body.'
       );
     }
 
@@ -91,10 +127,31 @@ const applyLeave = async (req, res, next) => {
   }
 };
 
-// 2. Karyawan melihat riwayat cuti miliknya sendiri
+// 2. Karyawan melihat riwayat cuti miliknya sendiri (atau berdasarkan employee_code / nama)
 const getMyLeaves = async (req, res, next) => {
   try {
-    if (!req.user.employee_id) {
+    let targetEmployeeId = req.user.employee_id;
+    let displayName = req.user.employee_code || req.user.full_name || req.user.username;
+
+    const queryCode = (!isTemplate(req.query.employee_code) && req.query.employee_code) ? String(req.query.employee_code).trim() : null;
+    const queryName = (!isTemplate(req.query.full_name) && req.query.full_name) ||
+                      (!isTemplate(req.query.name) && req.query.name) ? String(req.query.full_name || req.query.name).trim() : null;
+
+    if (queryCode) {
+      const emp = await get('SELECT id, employee_code, full_name FROM employees WHERE employee_code = ?', [queryCode]);
+      if (emp) {
+        targetEmployeeId = emp.id;
+        displayName = `${emp.employee_code} (${emp.full_name})`;
+      }
+    } else if (queryName) {
+      const emp = await get('SELECT id, employee_code, full_name FROM employees WHERE full_name ILIKE ? ORDER BY id DESC LIMIT 1', [`%${queryName}%`]);
+      if (emp) {
+        targetEmployeeId = emp.id;
+        displayName = `${emp.employee_code} (${emp.full_name})`;
+      }
+    }
+
+    if (!targetEmployeeId) {
       return errorResponse(res, 404, 'Profil karyawan Anda belum terdaftar.');
     }
 
@@ -110,10 +167,10 @@ const getMyLeaves = async (req, res, next) => {
        LEFT JOIN employees rev ON lr.reviewed_by = rev.id
        WHERE lr.employee_id = ?
        ORDER BY lr.created_at DESC`,
-      [req.user.employee_id]
+      [targetEmployeeId]
     );
 
-    return successResponse(res, 200, `Riwayat permohonan cuti untuk ${req.user.employee_code || req.user.full_name || req.user.username} berhasil diambil`, leaves);
+    return successResponse(res, 200, `Riwayat permohonan cuti untuk ${displayName} berhasil diambil`, leaves);
   } catch (error) {
     next(error);
   }
