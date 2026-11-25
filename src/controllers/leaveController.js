@@ -4,7 +4,8 @@ const { successResponse, errorResponse } = require('../utils/responseHelper');
 // Helper cek string template Postman yang belum ter-resolve (misal "{{employee_code}}")
 const isTemplate = (val) => typeof val === 'string' && val.trim().startsWith('{{') && val.trim().endsWith('}}');
 
-// 1. Karyawan mengajukan cuti / izin (Bisa untuk diri sendiri, atau menentukan employee_code, atau full_name)
+// 1. Mengajukan cuti / izin
+// Karyawan HANYA bisa mengajukan cuti untuk diri sendiri. Admin/HRD dapat mengajukan atas nama karyawan lain.
 const applyLeave = async (req, res, next) => {
   try {
     const {
@@ -18,6 +19,9 @@ const applyLeave = async (req, res, next) => {
       reason
     } = req.body;
 
+    const userRole = String(req.user.role || '').trim().toLowerCase();
+    const isHrOrAdmin = userRole === 'admin' || userRole === 'hrd';
+
     let targetEmployeeId = req.user.employee_id;
     let employeeInfo;
 
@@ -26,8 +30,13 @@ const applyLeave = async (req, res, next) => {
                           (!isTemplate(employee_name) && employee_name) ||
                           (!isTemplate(nama) && nama) ? String(full_name || employee_name || nama).trim() : null;
 
-    // 1. Cek berdasarkan employee_code jika dikirimkan
-    if (requestedCode) {
+    // Jika Karyawan mencoba mengajukan atas nama orang lain: tolak tegas 403 Forbidden
+    if (!isHrOrAdmin && requestedCode && req.user.employee_code && requestedCode !== req.user.employee_code) {
+      return errorResponse(res, 403, 'Akses ditolak. Sebagai Karyawan, Anda hanya diizinkan mengajukan cuti untuk diri Anda sendiri.');
+    }
+
+    // Jika Admin/HRD, izinkan menentukan karyawan yang diajukan
+    if (isHrOrAdmin && requestedCode) {
       employeeInfo = await get(
         `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
                 m.full_name AS manager_name
@@ -41,10 +50,7 @@ const applyLeave = async (req, res, next) => {
       if (employeeInfo) {
         targetEmployeeId = employeeInfo.id;
       }
-    }
-
-    // 2. Jika belum ditemukan tapi ada nama yang dikirimkan, cari berdasarkan nama
-    if (!employeeInfo && requestedName) {
+    } else if (isHrOrAdmin && requestedName) {
       employeeInfo = await get(
         `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
                 m.full_name AS manager_name
@@ -61,7 +67,7 @@ const applyLeave = async (req, res, next) => {
       }
     }
 
-    // 3. Jika belum ditemukan, gunakan profil dari token pengguna yang sedang login
+    // Default ke profil pengguna yang login
     if (!employeeInfo && targetEmployeeId) {
       employeeInfo = await get(
         `SELECT e.id, e.employee_code, e.full_name, p.name AS position, d.name AS department,
@@ -79,7 +85,7 @@ const applyLeave = async (req, res, next) => {
       return errorResponse(
         res,
         404,
-        'Akun Anda belum memiliki profil karyawan. Silakan daftarkan profil Anda terlebih dahulu atau sertakan employee_code / nama di body.'
+        'Akun Anda belum memiliki profil karyawan. Silakan hubungi HRD untuk mendaftarkan profil karyawan Anda.'
       );
     }
 
@@ -127,9 +133,13 @@ const applyLeave = async (req, res, next) => {
   }
 };
 
-// 2. Karyawan melihat riwayat cuti miliknya sendiri (atau berdasarkan employee_code / nama)
+// 2. Karyawan melihat riwayat cuti miliknya sendiri
+// Karyawan biasa HANYA boleh melihat riwayat cuti miliknya sendiri.
 const getMyLeaves = async (req, res, next) => {
   try {
+    const userRole = String(req.user.role || '').trim().toLowerCase();
+    const isHrOrAdmin = userRole === 'admin' || userRole === 'hrd';
+
     let targetEmployeeId = req.user.employee_id;
     let displayName = req.user.employee_code || req.user.full_name || req.user.username;
 
@@ -137,13 +147,18 @@ const getMyLeaves = async (req, res, next) => {
     const queryName = (!isTemplate(req.query.full_name) && req.query.full_name) ||
                       (!isTemplate(req.query.name) && req.query.name) ? String(req.query.full_name || req.query.name).trim() : null;
 
-    if (queryCode) {
+    // Jika Karyawan mencoba memfilter akun orang lain: tolak tegas 403 Forbidden
+    if (!isHrOrAdmin && queryCode && req.user.employee_code && queryCode !== req.user.employee_code) {
+      return errorResponse(res, 403, 'Akses ditolak. Sebagai Karyawan, Anda hanya diizinkan melihat riwayat cuti Anda sendiri.');
+    }
+
+    if (isHrOrAdmin && queryCode) {
       const emp = await get('SELECT id, employee_code, full_name FROM employees WHERE employee_code = ?', [queryCode]);
       if (emp) {
         targetEmployeeId = emp.id;
         displayName = `${emp.employee_code} (${emp.full_name})`;
       }
-    } else if (queryName) {
+    } else if (isHrOrAdmin && queryName) {
       const emp = await get('SELECT id, employee_code, full_name FROM employees WHERE full_name ILIKE ? ORDER BY id DESC LIMIT 1', [`%${queryName}%`]);
       if (emp) {
         targetEmployeeId = emp.id;
@@ -220,25 +235,44 @@ const getAllLeaves = async (req, res, next) => {
   }
 };
 
-// 4. Detail satu pengajuan cuti
+// 4. Detail satu pengajuan cuti (RBAC checked)
 const getLeaveById = async (req, res, next) => {
   try {
     const rawId = req.params.id ? req.params.id.trim() : '';
     const isNum = /^\d+$/.test(rawId);
-    let leave = await get(
-      `SELECT lr.*, e.employee_code, e.full_name, p.name AS position, d.name AS department,
+    const leave = await get(
+      `SELECT lr.*, e.employee_code, e.full_name, e.manager_id, p.name AS position, d.name AS department,
               rev.full_name AS reviewer_name
        FROM leave_requests lr
        JOIN employees e ON lr.employee_id = e.id
        JOIN positions p ON e.position_id = p.id
        JOIN departments d ON p.department_id = d.id
        LEFT JOIN employees rev ON lr.reviewed_by = rev.id
-       WHERE ${isNum ? 'lr.id = ? OR e.employee_code = ?' : 'e.employee_code = ?'}
+       WHERE ${isNum ? 'lr.id = ?' : 'e.employee_code = ?'}
        ORDER BY lr.id DESC LIMIT 1`,
-      isNum ? [Number(rawId), rawId] : [rawId]
+      [isNum ? Number(rawId) : rawId]
     );
 
     if (!leave) return errorResponse(res, 404, 'Data permohonan cuti tidak ditemukan');
+
+    const userRole = String(req.user.role || '').trim().toLowerCase();
+
+    // Karyawan hanya boleh melihat cuti miliknya sendiri
+    if (userRole === 'karyawan') {
+      if (!req.user.employee_id || Number(leave.employee_id) !== Number(req.user.employee_id)) {
+        return errorResponse(res, 403, 'Akses ditolak. Anda hanya diizinkan melihat permohonan cuti Anda sendiri.');
+      }
+    }
+
+    // Manager hanya boleh melihat bawahan langsung atau miliknya sendiri
+    if (userRole === 'manager') {
+      const isSelf = req.user.employee_id && Number(leave.employee_id) === Number(req.user.employee_id);
+      const isSubordinate = req.user.employee_id && leave.manager_id && Number(leave.manager_id) === Number(req.user.employee_id);
+      if (!isSelf && !isSubordinate) {
+        return errorResponse(res, 403, 'Akses ditolak. Anda hanya diizinkan melihat permohonan cuti bawahan langsung Anda.');
+      }
+    }
+
     return successResponse(res, 200, 'Detail permohonan cuti berhasil diambil', leave);
   } catch (error) {
     next(error);
@@ -270,30 +304,13 @@ const reviewLeave = async (req, res, next) => {
       );
     }
 
-    // Jika tidak ditemukan dengan ID tersebut, ambil permohonan Pending yang ada
-    if (!existing) {
-      existing = await get(
-        `SELECT lr.*, e.manager_id, e.employee_code, e.full_name FROM leave_requests lr
-         JOIN employees e ON lr.employee_id = e.id
-         WHERE lr.status = 'Pending'
-         ORDER BY lr.id ASC LIMIT 1`
-      );
-    }
-
-    if (!existing) {
-      existing = await get(
-        `SELECT lr.*, e.manager_id, e.employee_code, e.full_name FROM leave_requests lr
-         JOIN employees e ON lr.employee_id = e.id
-         ORDER BY lr.id DESC LIMIT 1`
-      );
-    }
-
     if (!existing) return errorResponse(res, 404, 'Data permohonan cuti tidak ditemukan');
 
-    // Jika Manager me-review, pastikan pemohon adalah bawahan langsungnya (jika terikat)
-    if (req.user.role === 'Manager' && existing.manager_id) {
-      if (req.user.employee_id && Number(existing.manager_id) !== Number(req.user.employee_id)) {
-        return errorResponse(res, 403, 'Anda hanya dapat meninjau permohonan cuti bawahan langsung Anda.');
+    // Jika Manager me-review, pastikan pemohon adalah bawahan langsungnya
+    const userRole = String(req.user.role || '').trim().toLowerCase();
+    if (userRole === 'manager') {
+      if (!existing.manager_id || !req.user.employee_id || Number(existing.manager_id) !== Number(req.user.employee_id)) {
+        return errorResponse(res, 403, 'Akses ditolak. Anda hanya dapat meninjau permohonan cuti bawahan langsung Anda.');
       }
     }
 
@@ -301,7 +318,7 @@ const reviewLeave = async (req, res, next) => {
       `UPDATE leave_requests
        SET status = ?, reviewed_by = ?, review_notes = ?, reviewed_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [status, req.user.employee_id || 2, review_notes || null, existing.id]
+      [status, req.user.employee_id || null, review_notes || null, existing.id]
     );
 
     const updated = await get(
@@ -336,16 +353,17 @@ const cancelMyLeave = async (req, res, next) => {
       );
     }
 
-    if (!existing || Number(existing.employee_id) !== Number(req.user.employee_id)) {
-      // Cari cuti pending milik diri sendiri
-      existing = await get(
-        'SELECT * FROM leave_requests WHERE employee_id = ? AND status = \'Pending\' ORDER BY id DESC LIMIT 1',
-        [req.user.employee_id]
-      );
+    if (!existing) {
+      return errorResponse(res, 404, 'Data permohonan cuti tidak ditemukan.');
     }
 
-    if (!existing) {
-      return successResponse(res, 200, 'Tidak ada permohonan cuti pending yang perlu dibatalkan.');
+    const userRole = String(req.user.role || '').trim().toLowerCase();
+    if (userRole !== 'admin' && (!req.user.employee_id || Number(existing.employee_id) !== Number(req.user.employee_id))) {
+      return errorResponse(res, 403, 'Akses ditolak. Anda tidak berhak membatalkan permohonan cuti milik karyawan lain.');
+    }
+
+    if (existing.status !== 'Pending') {
+      return errorResponse(res, 400, `Permohonan cuti tidak dapat dibatalkan karena sudah berstatus '${existing.status}'.`);
     }
 
     await run('DELETE FROM leave_requests WHERE id = ?', [existing.id]);

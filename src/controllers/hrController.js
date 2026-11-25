@@ -193,23 +193,6 @@ const getEmployeeById = async (req, res, next) => {
       isNum ? [Number(rawId), rawId] : [rawId]
     );
 
-    if (!employee) {
-      // Fallback ke karyawan pertama jika tidak ditemukan
-      employee = await get(
-        `SELECT e.id, e.user_id, e.employee_code, e.full_name, e.position_id,
-                p.name AS position, d.id AS department_id, d.name AS department,
-                e.manager_id, m.full_name AS manager_name, u.username, u.email,
-                r.name AS role, e.hire_date, e.phone
-         FROM employees e
-         JOIN users u ON e.user_id = u.id
-         JOIN roles r ON u.role_id = r.id
-         JOIN positions p ON e.position_id = p.id
-         JOIN departments d ON p.department_id = d.id
-         LEFT JOIN employees m ON e.manager_id = m.id
-         ORDER BY e.id ASC LIMIT 1`
-      );
-    }
-
     if (!employee) return errorResponse(res, 404, 'Data karyawan tidak ditemukan');
     return successResponse(res, 200, 'Detail karyawan berhasil diambil', employee);
   } catch (error) {
@@ -462,10 +445,7 @@ const updateEmployee = async (req, res, next) => {
       isNum ? [Number(rawId), rawId] : [rawId]
     );
 
-    if (!existing) {
-      existing = await get('SELECT * FROM employees ORDER BY id DESC LIMIT 1');
-      if (!existing) return errorResponse(res, 404, 'Data karyawan tidak ditemukan');
-    }
+    if (!existing) return errorResponse(res, 404, 'Data karyawan tidak ditemukan');
 
     let targetPosId = position_id !== undefined ? position_id : existing.position_id;
     if (position_name) {
@@ -568,9 +548,6 @@ const createAttendance = async (req, res, next) => {
       employee = await get('SELECT id, employee_code, full_name FROM employees WHERE id = ?', [employee_id]);
     }
 
-    if (!employee) {
-      employee = await get('SELECT id, employee_code, full_name FROM employees ORDER BY id ASC LIMIT 1');
-    }
     if (!employee) return errorResponse(res, 404, 'Karyawan tidak ditemukan');
 
     const existing = await get(
@@ -615,10 +592,7 @@ const updateAttendance = async (req, res, next) => {
       }
     }
 
-    if (!existing) {
-      existing = await get('SELECT * FROM attendances ORDER BY id DESC LIMIT 1');
-      if (!existing) return errorResponse(res, 404, 'Data absensi tidak ditemukan');
-    }
+    if (!existing) return errorResponse(res, 404, 'Data absensi tidak ditemukan');
 
     await run(
       `UPDATE attendances

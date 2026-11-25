@@ -60,9 +60,6 @@ const createSalary = async (req, res, next) => {
       targetEmployee = await get('SELECT id, employee_code, full_name FROM employees WHERE id = ?', [employee_id]);
     }
 
-    if (!targetEmployee) {
-      targetEmployee = await get('SELECT id, employee_code, full_name FROM employees ORDER BY id ASC LIMIT 1');
-    }
     if (!targetEmployee) return errorResponse(res, 404, 'Karyawan tidak ditemukan');
 
     const salaryExists = await get(
@@ -133,10 +130,7 @@ const updateSalaryStatus = async (req, res, next) => {
       }
     }
 
-    if (!existing) {
-      existing = await get('SELECT * FROM salaries ORDER BY id DESC LIMIT 1');
-      if (!existing) return errorResponse(res, 404, 'Data gaji tidak ditemukan');
-    }
+    if (!existing) return errorResponse(res, 404, 'Data gaji tidak ditemukan');
 
     const newBase = base_salary !== undefined ? parseFloat(base_salary) : parseFloat(existing.base_salary);
     const newAllowance = allowance !== undefined ? parseFloat(allowance) : parseFloat(existing.allowance);

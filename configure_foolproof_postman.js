@@ -144,7 +144,7 @@ for (const folder of coll.item) {
     }
   } else if (fName.includes('2. HRD') || fName.includes('5. HRD') || fName.includes('6. HRD')) {
     for (const item of folder.item) {
-      setAuthHeader(item, 'hrd_token');
+      setAuthHeader(item, 'token');
     }
     // Khusus 2.1 Terima Karyawan Baru
     const item21 = folder.item.find(i => i.name.includes('2.1 [TOMBOL HRD]'));
@@ -183,11 +183,7 @@ for (const folder of coll.item) {
     }
   } else if (fName.includes('3. Pengajuan & Persetujuan Cuti')) {
     for (const item of folder.item) {
-      if (item.name.includes('3.1 [Karyawan] Ajukan') || item.name.includes('3.2 [Karyawan] Lihat') || item.name.includes('3.3 [Karyawan] Batalkan')) {
-        setAuthHeader(item, 'karyawan_token');
-      } else {
-        setAuthHeader(item, 'hrd_token');
-      }
+      setAuthHeader(item, 'token');
 
       if (item.name.includes('3.1 [Karyawan] Ajukan')) {
         item.request.body.raw = JSON.stringify({
@@ -218,19 +214,19 @@ for (const folder of coll.item) {
     }
   } else if (fName.includes('4. Karyawan')) {
     for (const item of folder.item) {
-      setAuthHeader(item, 'karyawan_token');
+      setAuthHeader(item, 'token');
     }
   } else if (fName.includes('7. Keuangan')) {
     for (const item of folder.item) {
-      setAuthHeader(item, 'keuangan_token');
+      setAuthHeader(item, 'token');
     }
   } else if (fName.includes('8. Manager')) {
     for (const item of folder.item) {
-      setAuthHeader(item, 'manager_token');
+      setAuthHeader(item, 'token');
     }
   } else if (fName.includes('11. Admin')) {
     for (const item of folder.item) {
-      setAuthHeader(item, 'admin_token');
+      setAuthHeader(item, 'token');
     }
   } else {
     for (const item of folder.item) {

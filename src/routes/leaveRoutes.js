@@ -55,7 +55,7 @@ router.get(
 
 router.get(
   '/:id',
-  authorizeRoles('Admin', 'HRD', 'Manager'),
+  authorizeRoles('Admin', 'HRD', 'Manager', 'Karyawan'),
   [param('id').trim().notEmpty().withMessage('ID cuti atau kode karyawan wajib diisi')],
   validateRequest,
   getLeaveById
